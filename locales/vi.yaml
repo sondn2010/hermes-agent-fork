@@ -1,0 +1,440 @@
+# Hermes static-message catalog -- Vietnamese
+# See locales/en.yaml for the source of truth; keep keys in sync.
+
+approval:
+  dangerous_header: "⚠️  LỆNH NGUY HIỂM: {description}"
+  choose_long:     "      [o]một lần  |  [s]phiên  |  [a]luôn luôn  |  [d]từ chối"
+  choose_short:    "      [o]một lần  |  [s]phiên  |  [d]từ chối"
+  prompt_long:     "      Lựa chọn [o/s/a/D]: "
+  prompt_short:    "      Lựa chọn [o/s/D]: "
+  choose_smart_deny: "      [o]một lần  |  [d]từ chối"
+  prompt_smart_deny: "      Lựa chọn [o/D]: "
+  smart_deny_once_inputs: "o,once"
+  smart_deny_deny_inputs: "d,deny"
+  timeout:         "      ⏱ Hết giờ - từ chối lệnh"
+  allowed_once:    "      ✓ Đã cho phép một lần"
+  allowed_session: "      ✓ Đã cho phép cho phiên này"
+  allowed_always:  "      ✓ Đã thêm vào allowlist vĩnh viễn"
+  denied:          "      ✗ Đã từ chối"
+  cancelled:       "      ✗ Đã hủy"
+  blocklist_message: "Lệnh này nằm trong blocklist vô điều kiện và không thể phê duyệt."
+
+gateway:
+  approval_expired: "⚠️ Phê duyệt đã hết hạn (agent không còn chờ nữa). Yêu cầu agent thử lại."
+  draining:         "⏳ Đang giải phóng {count} agent hoạt động trước khi khởi động lại..."
+  goal_cleared:     "✓ Đã xóa Goal."
+  no_active_goal:   "Không có Goal hoạt động."
+  config_read_failed: "⚠️ Không thể đọc config.yaml: {error}"
+  config_save_failed: "⚠️ Không thể lưu cấu hình: {error}"
+
+  model:
+    error_prefix:           "Lỗi: {error}"
+    switched:               "Đã chuyển Model sang `{model}`"
+    provider_label:         "Provider: {provider}"
+    context_label:          "Context: {tokens} tokens"
+    max_output_label:       "Max output: {tokens} tokens"
+    cost_label:             "Chi phí: {cost}"
+    capabilities_label:     "Khả năng: {capabilities}"
+    prompt_caching_enabled: "Prompt caching: đã bật"
+    warning_prefix:         "Cảnh báo: {warning}"
+    saved_global:           "Đã lưu vào config.yaml (`--global`)"
+    session_only_hint:      "_(chỉ phiên này — thêm `--global` để duy trì)_"
+    current_label:          "Hiện tại: `{model}` trên {provider}"
+    current_tag:            " (hiện tại)"
+    more_models_suffix:     " (+{count} khác)"
+    usage_switch_model:     "`/model <name>` — chuyển model"
+    usage_switch_provider:  "`/model <name> --provider <slug>` — chuyển provider"
+    usage_persist:          "`/model <name> --global` — duy trì"
+
+  agents:
+    header:                "🤖 **Agent & Task đang hoạt động**"
+    active_agents:         "**Agent đang hoạt động:** {count}"
+    this_chat:             " · chat này"
+    more:                  "... và {count} khác"
+    running_processes:     "**Tiến trình nền đang chạy:** {count}"
+    async_jobs:            "**Job không đồng bộ gateway:** {count}"
+    background_delegations: "**Ủy quyền nền:** {count}"
+    none:                  "Không có Agent hoặc Task nào hoạt động."
+    state_starting:        "đang khởi động"
+    state_running:         "đang chạy"
+
+  approve:
+    no_pending:            "Không có lệnh đang chờ phê duyệt."
+    once_singular:         "✅ Lệnh đã được phê duyệt. Agent đang tiếp tục..."
+    once_plural:           "✅ Các lệnh đã được phê duyệt ({count} lệnh). Agent đang tiếp tục..."
+    session_singular:      "✅ Lệnh đã được phê duyệt (pattern được phê duyệt cho phiên này). Agent đang tiếp tục..."
+    session_plural:        "✅ Các lệnh đã được phê duyệt (pattern được phê duyệt cho phiên này) ({count} lệnh). Agent đang tiếp tục..."
+    always_singular:       "✅ Lệnh đã được phê duyệt (pattern được phê duyệt vĩnh viễn). Agent đang tiếp tục..."
+    always_plural:         "✅ Các lệnh đã được phê duyệt (pattern được phê duyệt vĩnh viễn) ({count} lệnh). Agent đang tiếp tục..."
+
+  background:
+    usage:                 "Cách dùng: /background <prompt>\nVí dụ: /background Summarize the top HN stories today\n\nChạy prompt trong một phiên riêng biệt. Bạn có thể tiếp tục chat — kết quả sẽ xuất hiện ở đây khi hoàn thành."
+    started:               "🔄 Đã bắt đầu task nền: \"{preview}\"\nTask ID: {task_id}\nBạn có thể tiếp tục chat — kết quả sẽ xuất hiện khi hoàn thành."
+
+  branch:
+    db_unavailable:        "Database phiên không khả dụng."
+    no_conversation:       "Không có cuộc hội thoại nào để nhánh — vui lòng gửi tin nhắn trước."
+    create_failed:         "Tạo nhánh thất bại: {error}"
+    switch_failed:         "Đã tạo nhánh nhưng không thể chuyển sang nhánh đó."
+    branched_one:          "⑂ Đã nhánh sang **{title}** (đã sao chép {count} tin nhắn)\nGốc: `{parent}`\nNhánh: `{new}`\nSử dụng `/resume` để quay lại bản gốc."
+    branched_many:         "⑂ Đã nhánh sang **{title}** (đã sao chép {count} tin nhắn)\nGốc: `{parent}`\nNhánh: `{new}`\nSử dụng `/resume` để quay lại bản gốc."
+
+  commands:
+    usage:                 "Cách dùng: `/commands [page]`"
+    skill_header:          "⚡ **Lệnh Skill**:"
+    default_desc:          "Lệnh Skill"
+    none:                  "Không có lệnh nào khả dụng."
+    header:                "📚 **Danh sách lệnh** (tổng số {total}, trang {page}/{total_pages})"
+    nav_prev:              "`/commands {page}` ← trước"
+    nav_next:              "tiếp → `/commands {page}`"
+    out_of_range:          "_(Trang yêu cầu {requested} vượt quá phạm vi, hiển thị trang {page}.)_"
+
+  compress:
+    not_enough:            "Không đủ hội thoại để nén (cần ít nhất 4 tin nhắn)."
+    no_provider:           "Không có provider nào được cấu hình -- không thể nén."
+    nothing_to_do:         "Chưa có gì để nén (toàn bộ transcript vẫn là context được bảo vệ)."
+    aggressive_unsupported: "--aggressive không được hỗ trợ; sử dụng '/compress here [N]' để chỉ giữ các trao đổi gần đây, hoặc /undo để hủy các turn."
+    focus_line:            "Focus: \"{topic}\""
+    summary_failed:        "⚠️ Tạo tóm tắt thất bại ({error}). {count} tin nhắn lịch sử đã bị xóa và thay thế bằng placeholder; context trước đó không còn khả năng khôi phục. Vui lòng kiểm tra cấu hình model auxiliary.compression của bạn."
+    aborted:               "⚠️ Tiến trình nén bị hủy ({error}). Không có tin nhắn nào bị bỏ — cuộc hội thoại không thay đổi. Chạy /compress để thử lại, /reset để bắt đầu phiên sạch, hoặc kiểm tra cấu hình model auxiliary.compression của bạn."
+    aux_failed:            "ℹ️ Model nén được cấu hình `{model}` bị lỗi ({error}). Đã khôi phục bằng cách sử dụng model chính của bạn — context vẫn nguyên vẹn — nhưng bạn nên kiểm tra lại `auxiliary.compression.model` trong config.yaml."
+    failed:                "Nén thất bại: {error}"
+
+  debug:
+    upload_failed:         "✗ Tải lên báo cáo debug thất bại: {error}"
+    header:                "**Báo cáo debug đã được tải lên:**"
+    auto_delete:           "⏱ Các bản dán sẽ tự động xóa sau 6 giờ."
+    full_logs_hint:        "Để tải lên toàn bộ log, sử dụng `hermes debug share` từ CLI."
+    share_hint:            "Chia sẻ các link này với đội ngũ Hermes để được hỗ trợ."
+
+  deny:
+    stale:                 "❌ Đã từ chối lệnh (phê duyệt đã quá hạn)."
+    no_pending:            "Không có lệnh đang chờ để từ chối."
+    denied_singular:       "❌ Đã từ chối lệnh."
+    denied_plural:         "❌ Đã từ chối các lệnh ({count} lệnh)."
+    denied_reason_singular: "❌ Đã từ chối lệnh. Lý do được gửi tới agent: \"{reason}\""
+    denied_reason_plural:  "❌ Đã từ chối các lệnh ({count} lệnh). Lý do được gửi tới agent: \"{reason}\""
+
+  fast:
+    not_supported:         "⚡ /fast chỉ khả dụng cho các model OpenAI hỗ trợ Priority Processing."
+    status:                "⚡ Priority Processing\n\nChế độ hiện tại: `{mode}`\n\n_Cách dùng:_ `/fast <normal|fast|status>`"
+    unknown_arg:           "⚠️ Đối số không hợp lệ: `{arg}`\n\n**Các tùy chọn hợp lệ:** normal, fast, status"
+    saved:                 "⚡ ✓ Priority Processing: **{label}** (đã lưu vào cấu hình)\n_(có hiệu lực ở tin nhắn tiếp theo)_"
+    session_only:          "⚡ ✓ Priority Processing: **{label}** (chỉ phiên này)"
+    label_fast:            "FAST"
+    label_normal:          "NORMAL"
+    status_fast:           "fast"
+    status_normal:         "normal"
+    picker_title:          "⚡ **Priority Processing**\n\nChế độ hiện tại: `{mode}`\n\nChọn một tùy chọn:"
+    choice_fast:           "fast — Bật Priority Processing"
+    choice_normal:         "normal — Xử lý tiêu chuẩn"
+
+  footer:
+    status:                "📎 Runtime footer: **{state}**\nCác trường: `{fields}`\nPlatform: `{platform}`"
+    usage:                 "Cách dùng: `/footer [on|off|status]`"
+    saved:                 "📎 Runtime footer: **{state}**{example}\n_(đã lưu toàn cục — có hiệu lực ở tin nhắn tiếp theo)_"
+    example_line:          "\nVí dụ: `{preview}`"
+    state_on:              "ON"
+    state_off:             "OFF"
+
+  goal:
+    unavailable:           "Goals không khả dụng trong phiên này."
+    no_goal_set:           "Chưa đặt Goal."
+    paused:                "⏸ Goal đã tạm dừng: {goal}"
+    no_resume:             "Không có Goal nào để tiếp tục."
+    resumed:               "▶ Goal đã được tiếp tục: {goal}\nGửi bất kỳ tin nhắn nào để tiếp tục, hoặc đợi — tôi sẽ thực hiện bước tiếp theo ở lượt sau."
+    invalid:               "Goal không hợp lệ: {error}"
+    set:                   "⊙ Đã đặt Goal (ngân sách {budget} lượt): {goal}\nTôi sẽ tiếp tục làm việc cho đến khi Goal hoàn thành, bạn tạm dừng/xóa nó hoặc hết ngân sách.\nĐiều khiển: /goal status · /goal pause · /goal resume · /goal clear"
+
+  help:
+    header:                "📖 **Các lệnh Hermes**\n"
+    skill_header:          "\n⚡ **Lệnh Skill** ({count} đang hoạt động):"
+    more_use_commands:     "\n... và {count} lệnh khác. Sử dụng `/commands` để xem toàn bộ danh sách phân trang."
+
+  insights:
+    invalid_days:          "Giá trị --days không hợp lệ: {value}"
+    error:                 "Lỗi khi tạo insights: {error}"
+
+  kanban:
+    error_prefix:          "⚠ Lỗi kanban: {error}"
+    subscribed_suffix:     "(đã đăng ký — bạn sẽ được thông báo khi {task_id} hoàn thành hoặc bị chặn)"
+    truncated_suffix:      "… (bị cắt bớt; sử dụng `hermes kanban …` trong terminal của bạn để xem đầy đủ kết quả)"
+    no_output:             "(không có kết quả)"
+    wake:
+      completed:           "hoàn thành"
+      gave_up:             "bỏ cuộc (đã hết số lần thử lại)"
+      crashed:             "bị sập (worker đã thoát); dispatcher sẽ thử lại"
+      timed_out:           "hết giờ; dispatcher sẽ thử lại"
+      blocked:             "bị chặn; cần chú ý"
+      status_default:      "trạng thái đã thay đổi"
+      status_joiner:       ", "
+      message:             "[kanban] Task {task_id} {status}.\nTiêu đề: {title}\nNgười được giao: @{assignee}\nBảng: {board}\n\nKiểm tra kết quả hoặc quyết định bước tiếp theo."
+      handoff:             "Result: {summary}"
+      guidance:            "Đây là thông báo trạng thái task tự động, không phải yêu cầu phân rã task lại. Hãy kiểm tra bảng hiện tại trước khi tạo các task tiếp theo; không tạo lại các task hoặc biểu đồ đã tồn tại."
+
+  personality:
+    none_configured:       "Không có personality nào được cấu hình trong `{path}/config.yaml`"
+    header:                "🎭 **Personalities khả dụng**\n"
+    none_option:           "• `none` — (không sử dụng personality)"
+    item:                  "• `{name}` — {preview}"
+    usage:                 "\nCách dùng: `/personality <name>`"
+    save_failed:           "⚠️ Lưu thay đổi personality thất bại: {error}"
+    cleared:               "🎭 Đã xóa personality — sử dụng hành vi mặc định của agent.\n_(có hiệu lực ở tin nhắn tiếp theo)_"
+    set_to:                "🎭 Đã đặt personality thành **{name}**\n_(có hiệu lực ở tin nhắn tiếp theo)_"
+    unknown:               "Personality không xác định: `{name}`\n\nKhả dụng: {available}"
+
+  profile:
+    header:                "👤 **Profile:** `{profile}`"
+    home:                  "📂 **Home:** `{home}`"
+
+  reasoning:
+    level_default:             "trung bình (mặc định)"
+    level_disabled:            "không bật (tắt)"
+    scope_session:             "ghi đè phiên"
+    scope_global:              "cấu hình toàn cục"
+    status:                    "🧠 **Cài đặt Reasoning**\n\n**Effort:** `{level}`\n**Scope:** {scope}\n**Hiển thị:** {display}\n\n_Cách dùng:_ `/reasoning <none|minimal|low|medium|high|xhigh|max|ultra|reset|show|hide> [--global]`"
+    display_on:                "bật ✓"
+    display_off:               "tắt"
+    display_set_on:            "🧠 ✓ Hiển thị reasoning: **BẬT**\nSuy nghĩ của model sẽ được hiển thị trước mỗi phản hồi trên **{platform}**."
+    display_set_off:           "🧠 ✓ Hiển thị reasoning: **TẮT** trên **{platform}**"
+    reset_global_unsupported:  "⚠️ `/reasoning reset --global` không được hỗ trợ. Sử dụng `/reasoning <level> --global` để thay đổi mặc định toàn cục."
+    reset_done:                "🧠 ✓ Đã xóa ghi đè reasoning của phiên; quay lại sử dụng cấu hình toàn cục."
+    unknown_arg:               "⚠️ Đối số không hợp lệ: `{arg}`\n\n**Các mức hợp lệ:** none, minimal, low, medium, high, xhigh, max, ultra\n**Hiển thị:** show, hide\n**Duy trì:** thêm `--global` để lưu sau phiên này"
+    picker_title:              "🧠 **Cài đặt Reasoning**\n\n**Effort:** `{level}`\n**Scope:** {scope}\n**Hiển thị:** {display}\n\nChọn một tùy chọn:"
+    choice_none:               "none — tắt reasoning"
+    choice_reset:              "reset — xóa ghi đè phiên"
+    choice_show:               "show — hiển thị reasoning trong câu trả lời"
+    choice_hide:               "hide — ẩn reasoning khỏi câu trả lời"
+    set_global:                "🧠 ✓ Đã đặt mức độ reasoning thành `{effort}` (đã lưu vào cấu hình)\n_(có hiệu lực ở tin nhắn tiếp theo)_"
+    set_global_save_failed:    "🧠 ✓ Đã đặt mức độ reasoning thành `{effort}` (chỉ phiên này — lưu cấu hình thất bại)\n_(có hiệu lực ở tin nhắn tiếp theo)_"
+    set_session:               "🧠 ✓ Đã đặt mức độ reasoning thành `{effort}` (chỉ phiên này — thêm `--global` để duy trì)\n_(có hiệu lực ở tin nhắn tiếp theo)_"
+
+  reload_mcp:
+    cancelled:             "🟡 Đã hủy /reload-mcp. Các tool MCP giữ nguyên."
+    always_followup:       "ℹ️ Các lệnh gọi `/reload-mcp` trong tương lai sẽ chạy mà không cần xác nhận. Bật lại qua `approvals.mcp_reload_confirm: true` trong config.yaml."
+    confirm_prompt:        "⚠️ **Xác nhận /reload-mcp**\n\nViệc tải lại các MCP Server sẽ xây dựng lại tập hợp tool cho phiên này và **làm mất hiệu lực cache prompt của provider** — tin nhắn tiếp theo sẽ gửi lại toàn bộ token đầu vào. Điều này có thể tốn kém trên các model có context dài hoặc có độ suy luận cao.\n\nChọn:\n• **Phê duyệt một lần** — tải lại ngay bây giờ\n• **Luôn phê duyệt** — tải lại ngay bây giờ và tắt thông báo này vĩnh viễn\n• **Hủy** — giữ nguyên các tool MCP\n\n_Phương án dự phòng bằng văn bản: phản hồi `/approve`, `/always`, hoặc `/cancel`._"
+    header:                "🔄 **Đã tải lại các MCP Server**\n"
+    reconnected:           "♻️ Đã kết nối lại: {names}"
+    added:                 "➕ Đã thêm: {names}"
+    removed:               "➖ Đã xóa: {names}"
+    none_connected:        "Không có MCP Server nào được kết nối."
+    tools_available:       "\n🔧 {tools} tool(s) available from {servers} server(s)"
+    failed:                "❌ Tải lại MCP thất bại: {error}"
+
+  reload_skills:
+    header:                "🔄 **Đã tải lại các Skill**\n"
+    no_new:                "Không phát hiện Skill mới."
+    total:                 "\n📚 {count} skill(s) available"
+    added_header:          "➕ **Các Skill đã thêm:**"
+    removed_header:        "➖ **Các Skill đã xóa:**"
+    item_with_desc:        "    - {name}: {desc}"
+    item_no_desc:          "    - {name}"
+    failed:                "❌ Tải lại các Skill thất bại: {error}"
+
+  reset:
+    header_default:        "✨ Đã reset phiên! Bắt đầu lại từ đầu."
+    header_new:            "✨ Đã bắt đầu phiên mới!"
+    header_titled:         "✨ Đã bắt đầu phiên mới: {title}"
+    title_rejected:        "\n⚠️ Tiêu đề bị từ chối: {error}"
+    title_error_untitled:  "\n⚠️ {error} — phiên được bắt đầu không có tiêu đề."
+    title_empty_untitled:  "\n⚠️ Tiêu đề trống sau khi dọn dẹp — phiên được bắt đầu không có tiêu đề."
+    tip:                   "\n✦ Gợi ý: {tip}"
+
+  restart:
+    in_progress:           "⏳ Đang thực hiện khởi động lại gateway..."
+    restarting:            "♻ Đang khởi động lại gateway. Nếu bạn không nhận được thông báo trong vòng 60 giây, hãy khởi động lại từ console bằng lệnh `hermes gateway restart`."
+
+  resume:
+    db_unavailable:        "Database phiên không khả dụng."
+    parse_error:           "⚠️ Không thể phân tích đối số của `/resume`: {error}.\nSử dụng dấu ngoặc kép quanh tiêu đề có khoảng trắng, ví dụ: `/resume \"Project A Plan\"`."
+    matrix_no_named_sessions: "Không tìm thấy phiên có tên nào cho phòng Matrix này.\nSử dụng `/title My Session` để đặt tên cho phiên phòng hiện tại, `/resume --all` để liệt kê tất cả các phiên Matrix, hoặc `/resume --cross-room <session name>` để vượt qua ranh giới phòng một cách rõ ràng."
+    matrix_blocked_no_origin: "⚠️ Matrix /resume bị chặn: phiên được đặt tên này không ghi nhận phòng gốc, vì vậy Hermes sẽ không khôi phục nó bên trong phòng hiện tại theo mặc định. Sử dụng `/resume --cross-room {name}` nếu bạn thực sự muốn vượt ranh giới phòng."
+    matrix_blocked_other_room: "⚠️ Matrix /resume bị chặn: phiên đó thuộc về một phòng Matrix khác ({room}). Sử dụng `/resume --cross-room {name}` nếu bạn thực sự muốn khôi phục nó ở đây."
+    matrix_cross_room_success: "⚠️ Khôi phục chéo phòng: đã khôi phục **{title}** bên trong phòng Matrix **{room}**.\nCác tin nhắn tiếp theo trong phòng này sẽ sử dụng transcript đó cho đến khi thực hiện `/reset` hoặc `/resume` khác.{msg_part}"
+    blocked_not_owner:     "⚠️ /resume bị chặn: '**{name}**' thuộc về một người dùng hoặc chat khác. Bạn chỉ có thể khôi phục các phiên từ chat này."
+    no_named_sessions:     "Không tìm thấy phiên có tên nào.\nSử dụng `/title My Session` để đặt tên cho phiên hiện tại của bạn, sau đó dùng `/resume My Session` để quay lại sau."
+    list_header:           "📋 **Các phiên có tên**\n"
+    list_item:             "• **{title}**{preview_part}"
+    list_item_numbered:    "{index}. **{title}**{preview_part}"
+    list_preview_suffix:   " — _{preview}_"
+    list_footer:           "\nCách dùng: `/resume <session name>`"
+    list_footer_numbered:  "\nCách dùng: `/resume <session name>` hoặc `/resume <number>` (ví dụ: `/resume 1` cho phiên gần đây nhất)"
+    list_failed:           "Không thể liệt kê các phiên: {error}"
+    out_of_range:          "Chỉ mục khôi phục {index} vượt quá phạm vi.\nSử dụng `/resume` không có đối số để xem các phiên khả dụng."
+    not_found:             "Không tìm thấy phiên nào khớp với '**{name}**'.\nSử dụng `/resume` không có đối số để xem các phiên khả dụng."
+    already_on:            "📌 Đang ở phiên **{name}**."
+    switch_failed:         "Chuyển đổi phiên thất bại."
+    resumed_one:           "↻ Đã khôi phục phiên **{title}** ({count} tin nhắn). Đã khôi phục cuộc hội thoại."
+    resumed_many:          "↻ Đã khôi phục phiên **{title}** ({count} tin nhắn). Đã khôi phục cuộc hội thoại."
+    resumed_no_count:      "↻ Đã khôi phục phiên **{title}**. Đã khôi phục cuộc hội thoại."
+
+  retry:
+    no_previous:           "Không có tin nhắn trước đó để thử lại."
+
+  rollback:
+    not_enabled:           "Checkpoints chưa được bật.\nBật trong config.yaml:\n```\ncheckpoints:\n  enabled: true\n```"
+    none_found:            "Không tìm thấy checkpoint nào cho {cwd}"
+    invalid_number:        "Số checkpoint không hợp lệ. Sử dụng 1-{max}."
+    restored:              "✅ Đã khôi phục về checkpoint {hash}: {reason}\nMột bản chụp nhanh trước khi rollback đã được tự động lưu."
+    restore_failed:        "❌ {error}"
+
+  diff:
+    not_enabled:           "Checkpoints chưa được bật, vì vậy không có phiên baseline.\nBật trong config.yaml:\n```\ncheckpoints:\n  enabled: true\n```\nLệnh /diff thông thường vẫn hoạt động — lệnh này sử dụng git trực tiếp."
+    no_changes:            "Không có thay đổi."
+    failed:                "{error}"
+
+  set_home:
+    save_failed:           "Lưu kênh home thất bại: {error}"
+    success:               "✅ Đã đặt kênh home thành **{name}** (ID: {chat_id}).\nCác cron job và tin nhắn đa nền tảng sẽ được gửi đến đây."
+
+  context:
+    header:                "🧠 **Context Window**"
+    model:                 "Model: `{model}`"
+    window:                "Window: {total} tokens"
+    in_use:                "In use: {used} / {total} ({pct}%)"
+    bar:                   "{bar}"
+    headroom:              "Headroom to limit: {headroom} tokens"
+    threshold:             "Auto-compresses at: {threshold} ({threshold_pct}%) — {to_go} to go"
+    over_threshold:        "⚠️ **Over auto-compression threshold ({threshold}, {threshold_pct}%)**"
+    compressions:          "Compressions this session: {count}"
+    last_savings:          "Last compression freed: {savings}% of context"
+    totals_header:         "Session totals (cumulative across {calls} API calls)"
+    totals_line:           "Input {input} · Output {output} · Reasoning {reasoning}"
+    total_billed:          "Total billed: {total}"
+    throughput_note:       "_Throughput, not context size — each call re-sends the window above._"
+    estimated:             "Estimated context: ~{count} tokens across {messages} messages"
+    detail_after_first:    "_(Full compression and throughput stats available after the first agent response)_"
+    no_data:               "No context data available yet. Send a message to start a session."
+
+  status:
+    header:                "📊 **Trạng thái Hermes Gateway**"
+    matrix_scope_header:   "**Phạm vi Matrix:**"
+    matrix_scope_room:     "  phòng: {room}"
+    matrix_scope_room_id:  "  room_id: {room_id}"
+    matrix_scope_thread:   "  thread_id: {thread_id}"
+    matrix_scope_mode:     "  session_scope: {scope}"
+    matrix_scope_key:      "  session_key: {session_key}"
+    session_id:            "**ID Phiên:** `{session_id}`"
+    title:                 "**Tiêu đề:** {title}"
+    created:               "**Được tạo:** {timestamp}"
+    last_activity:         "**Hoạt động cuối:** {timestamp}"
+    model:                 "**Model:** `{model}`"
+    model_provider:        "**Model:** `{model}` ({provider})"
+    context:               "**Context:** {used} / {total} ({pct}%)"
+    context_used:          "**Context:** ~{used} tokens"
+    tokens:                "**Số token đã thanh toán trọn đời:** {tokens} _(không phải kích thước context hiện tại; sử dụng `/context`)_"
+    agent_running:         "**Agent đang chạy:** {state}"
+    state_yes:             "Có ⚡"
+    state_no:              "Không"
+    queued:                "**Các phản hồi đang chờ:** {count}"
+    platforms:             "**Các nền tảng đã kết nối:** {platforms}"
+
+  stop:
+    stopped_pending:       "⚡ Đã dừng. Agent chưa khởi động — bạn có thể tiếp tục phiên này."
+    stopped:               "⚡ Đã dừng. Bạn có thể tiếp tục phiên này."
+    no_active:             "Không có task hoạt động nào để dừng."
+
+  title:
+    db_unavailable:        "Database phiên không khả dụng."
+    warn_prefix:           "⚠️ {error}"
+    empty_after_clean:     "⚠️ Tiêu đề trống sau khi dọn dẹp. Vui lòng sử dụng các ký tự in được."
+    set_to:                "✏️ Tiêu đề phiên đã được đặt: **{title}**"
+    not_found:             "Không tìm thấy phiên trong database."
+    current_with_title:    "📌 Phiên: `{session_id}`\nTiêu đề: **{title}**"
+    current_no_title:      "📌 Phiên: `{session_id}`\nChưa đặt tiêu đề. Cách dùng: `/title Tên phiên của tôi`"
+
+  topic:
+    not_telegram_dm:         "Lệnh /topic chỉ khả dụng trong chat riêng tư của Telegram."
+    no_session_db:           "Database phiên không khả dụng."
+    unauthorized:            "Bạn không được phép sử dụng /topic trên bot này."
+    restore_needs_topic:     "Để khôi phục một phiên, trước tiên hãy tạo hoặc mở một topic Telegram, sau đó gửi /topic <session-id> bên trong topic đó. Để tạo một topic mới, mở Tất cả tin nhắn và gửi bất kỳ tin nhắn nào ở đó."
+    topics_disabled:         "Các topic Telegram chưa được bật cho bot này.\n\nCách bật:\n1. Mở @BotFather.\n2. Chọn bot của bạn.\n3. Mở Bot Settings → Threads Settings.\n4. Bật Threaded Mode và đảm bảo người dùng được phép tạo thread mới.\n\nSau đó gửi lại /topic."
+    topics_user_disallowed:  "Các topic Telegram đã được bật, nhưng người dùng không được phép tạo topic.\n\nMở @BotFather → chọn bot của bạn → Bot Settings → Threads Settings, sau đó tắt 'Disallow users to create new threads'.\n\nSau đó gửi lại /topic."
+    enable_failed:           "Bật chế độ topic Telegram thất bại: {error}"
+    bound_status:            "Topic này được liên kết với:\nPhiên: {label}\nID: {session_id}\n\nSử dụng /new để thay thế topic này bằng một phiên mới.\nĐể làm việc song song, mở Tất cả tin nhắn và gửi một tin nhắn ở đó để tạo một topic khác."
+    thread_ready:            "Đã bật đa phiên topic Telegram.\n\nTopic này sẽ được sử dụng như một phiên độc lập của Hermes. Sử dụng /new để thay thế phiên hiện tại của topic này. Để làm việc song song, mở Tất cả tin nhắn và gửi một tin nhắn ở đó để tạo một topic khác."
+    untitled_session:        "Phiên không có tiêu đề"
+
+  undo:
+    nothing:               "Không có gì để hoàn tác."
+    removed:               "↩️ Đã hoàn tác {turns} lượt ({count} tin nhắn).\nĐược sao lưu tại: \"{preview}\"\nSao chép/chỉnh sửa đoạn văn bản trên và gửi để re-prompt từ đây."
+    invalid_count:         "Số lượt không hợp lệ \"{arg}\" — sử dụng /undo hoặc /undo N."
+
+  update:
+    platform_not_messaging:  "✗ /update chỉ khả dụng từ các nền tảng tin nhắn. Chạy `hermes update` từ terminal."
+    not_git_repo:            "✗ Không phải là repository git — không thể cập nhật."
+    hermes_cmd_not_found:    "✗ Không tìm thấy lệnh `hermes`. Hermes đang chạy, nhưng lệnh cập nhật không thể tìm thấy tệp thực thi trên PATH hoặc thông qua trình thông dịch Python hiện tại. Thử chạy `hermes update` thủ công trong terminal của bạn."
+    start_failed:            "✗ Khởi động cập nhật thất bại: {error}"
+    starting:                "⚕ Đang bắt đầu cập nhật Hermes… tôi sẽ truyền tiến trình ở đây."
+
+  usage:
+    rate_limits:              "⏱️ **Giới hạn tốc độ:** {state}"
+    header_session:           "📊 **Mức sử dụng Token trong phiên**"
+    label_model:              "Model: `{model}`"
+    label_input_tokens:       "Token đầu vào: {count}"
+    label_cache_read:         "Token đọc từ cache: {count}"
+    label_cache_write:        "Token ghi vào cache: {count}"
+    label_output_tokens:      "Token đầu ra: {count}"
+    label_total:              "Tổng số: {count}"
+    label_api_calls:          "Cuộc gọi API: {count}"
+    label_cost:               "Chi phí: {prefix}${amount}"
+    label_cost_included:      "Chi phí: đã bao gồm"
+    label_context:            "Context: {used} / {total} ({pct}%)"
+    label_compressions:       "Số lần nén: {count}"
+    breakdown_header:         "🧩 **Phân tích context** _(ước tính)_"
+    breakdown_line:           "• {label}: ~{count} ({pct}%)"
+    breakdown_cat_system_prompt:        "System Prompt"
+    breakdown_cat_tool_definitions:     "Định nghĩa Tool"
+    breakdown_cat_rules:                "Rules"
+    breakdown_cat_skills:               "Skills"
+    breakdown_cat_mcp:                  "MCP"
+    breakdown_cat_subagent_definitions: "Định nghĩa subagent"
+    breakdown_cat_memory:               "Memory"
+    breakdown_cat_conversation:         "Hội thoại"
+    header_session_info:      "📊 **Thông tin phiên**"
+    label_messages:           "Tin nhắn: {count}"
+    label_estimated_context:  "Context ước tính: ~{count} tokens"
+    detailed_after_first:     "_(Chi tiết sử dụng sẽ hiển thị sau phản hồi đầu tiên của agent)_"
+    no_data:                  "Không có dữ liệu sử dụng cho phiên này."
+    unknown_subcommand:       "Phân lệnh /usage không hợp lệ: `{args}`. Hãy thử `/usage` hoặc `/usage reset [--force]`."
+    reset_wrong_provider:     "Đặt lại mức sử dụng đã tích lũy chỉ khả dụng trên provider openai-codex. Hãy chuyển đổi model bằng `/model` trước."
+
+  credits:
+    not_logged_in:            "Chưa đăng nhập vào Nous Portal. Đăng nhập để xem số dư tín dụng và nạp tiền."
+
+  verbose:
+    not_enabled:           "Lệnh `/verbose` không được bật cho các nền tảng tin nhắn.\n\nBật trong `config.yaml`:\n```yaml\ndisplay:\n  tool_progress_command: true\n```"
+    mode_off:              "⚙️ Tiến trình tool: **TẮT** — không hiển thị hoạt động của tool."
+    mode_new:              "⚙️ Tiến trình tool: **MỚI** — hiển thị khi tool thay đổi (độ dài xem trước: `display.tool_preview_length`, mặc định 40)."
+    mode_all:              "⚙️ Tiến trình tool: **TẤT CẢ** — hiển thị mọi lệnh gọi tool (độ dài xem trước: `display.tool_preview_length`, mặc định 40)."
+    mode_verbose:          "⚙️ Tiến trình tool: **CHI TIẾT** — hiển thị mọi cuộc gọi tool với đầy đủ các đối số."
+    mode_log:              "⚙️ Tiến trình tool: **LOG** — ẩn trong chat; các cuộc gọi tool được ghi vào ~/.hermes/logs/tool_calls.log."
+    saved_suffix:          "_(đã lưu cho **{platform}** — có hiệu lực ở tin nhắn tiếp theo)_"
+    save_failed:           "_(không thể lưu vào cấu hình: {error})_"
+
+  voice:
+    enabled_voice_only:    "Đã bật chế độ giọng nói.\nTôi sẽ trả lời bằng giọng nói khi bạn gửi tin nhắn thoại.\nSử dụng /voice tts để nhận phản hồi bằng giọng nói cho tất cả tin nhắn."
+    disabled_text:         "Đã tắt chế độ giọng nói. Chỉ phản hồi bằng văn bản."
+    tts_enabled:           "Đã bật tự động TTS.\nTất cả phản hồi sẽ đi kèm một tin nhắn thoại."
+    status_mode:           "Chế độ giọng nói: {label}"
+    status_channel:        "Kênh giọng nói: #{channel}"
+    status_participants:   "Số người tham gia: {count}"
+    status_member:         "  - {name}{status}"
+    speaking:              " (đang nói)"
+    enabled_short:         "Đã bật chế độ giọng nói."
+    disabled_short:        "Đã tắt chế độ giọng nói."
+    label_off:             "Tắt (chỉ văn bản)"
+    label_voice_only:      "Bật (phản hồi bằng giọng nói đối với tin nhắn thoại)"
+    label_all:             "TTS (phản hồi bằng giọng nói đối với mọi tin nhắn)"
+    help:                  "{toggle}\n\n**Cách hoạt động của /voice**\n• `/voice on` — phản hồi bằng giọng nói khi bạn gửi tin nhắn thoại\n• `/voice tts` — phản hồi bằng giọng nói đối với *mọi* tin nhắn\n• `/voice off` — quay lại phản hồi chỉ bằng văn bản\n• `/voice status` — hiển thị chế độ hiện tại\n• `/voice` (không có đối số) — chuyển đổi nhanh giữa bật và tắt{channels}"
+    help_channels:         "\n\n**Các kênh giọng nói trực tiếp (Discord)**\n• Tham gia kênh giọng nói trước, sau đó dùng `/voice channel` — tôi sẽ tham gia, lắng nghe và nói câu trả lời của mình\n• `/voice leave` — ngắt kết nối khỏi kênh giọng nói"
+
+  yolo:
+    disabled:                   "⚠️ Chế độ YOLO **TẮT** cho phiên này — các lệnh nguy hiểm sẽ yêu cầu phê duyệt."
+    enabled:                    "⚡ Chế độ YOLO **BẬT** cho phiên này — tất cả các lệnh được tự động phê duyệt. Hãy thận trọng."
+
+  shared:
+    session_db_unavailable:      "Database phiên không khả dụng."
+    session_db_unavailable_prefix: "Database phiên không khả dụng"
+    session_not_found:           "Không tìm thấy phiên trong database."
+    warn_passthrough:            "⚠️ {error}"

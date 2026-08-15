@@ -22,24 +22,24 @@ const NEUTRAL_PERSONALITIES = new Set(['', 'default', 'none', 'neutral'])
 
 const FALLBACK_COPY: IntroCopy[] = [
   {
-    headline: 'What are we moving today?',
-    body: "Send a bug, branch, plan, or rough idea. I'll inspect the repo and turn it into the next concrete step."
+    headline: 'Hôm nay chúng ta sẽ làm gì?',
+    body: 'Gửi một bug, nhánh, kế hoạch hoặc ý tưởng sơ lược. Tôi sẽ kiểm tra repo và chuyển nó thành bước đi cụ thể tiếp theo.'
   },
   {
-    headline: "What's on your mind?",
-    body: "Bring the code, question, or stuck part. I'll read the room before making changes."
+    headline: 'Bạn đang nghĩ gì thế?',
+    body: 'Hãy mang code, câu hỏi hoặc phần bị tắc lại đây. Tôi sẽ tìm hiểu kỹ bối cảnh trước khi thực hiện thay đổi.'
   },
   {
-    headline: 'What should Hermes look at?',
-    body: "Send the task, failing path, or half-formed plan. I'll help turn it into action."
+    headline: 'Hermes nên xem xét phần nào?',
+    body: 'Gửi nhiệm vụ, đường dẫn lỗi hoặc kế hoạch dở dang. Tôi sẽ giúp biến nó thành hành động.'
   },
   {
-    headline: 'Where should we start?',
-    body: "Bring the problem, goal, or file. I'll inspect first and keep the next step concrete."
+    headline: 'Chúng ta nên bắt đầu từ đâu?',
+    body: 'Hãy đưa vấn đề, mục tiêu hoặc file. Tôi sẽ kiểm tra trước và đề xuất bước đi cụ thể tiếp theo.'
   },
   {
-    headline: 'What needs attention?',
-    body: "Send the context you have. I'll help sort it into a plan or a fix."
+    headline: 'Phần nào cần chú ý?',
+    body: 'Gửi bối cảnh bạn đang có. Tôi sẽ giúp phân loại nó thành kế hoạch hoặc phương án sửa lỗi.'
   }
 ]
 
@@ -118,24 +118,24 @@ function fallbackCopyForPersonality(personalityKey: string): IntroCopy[] {
 
   return [
     {
-      headline: `${label} mode is on. What should we work on?`,
-      body: "Send the task, file, or rough idea. I'll use your configured voice and keep the work grounded in this repo."
+      headline: `Đang bật chế độ ${label}. Chúng ta nên làm gì?`,
+      body: "Gửi nhiệm vụ, file hoặc ý tưởng sơ lược. Tôi sẽ sử dụng giọng điệu bạn cấu hình và giữ công việc bám sát repo này."
     },
     {
-      headline: `What does ${label} Hermes need to see?`,
-      body: "Bring the context or the stuck part. I'll adapt to your configured personality."
+      headline: `${label} Hermes cần xem xét phần nào?`,
+      body: "Hãy đưa bối cảnh hoặc phần bị tắc. Tôi sẽ điều chỉnh theo personality bạn đã cấu hình."
     },
     {
-      headline: `${label} mode is ready.`,
-      body: "Send the problem, file, or idea. I'll follow the personality you've configured."
+      headline: `Chế độ ${label} đã sẵn sàng.`,
+      body: "Gửi vấn đề, file hoặc ý tưởng. Tôi sẽ làm theo personality bạn đã cấu hình."
     },
     {
-      headline: `What should ${label} Hermes tackle?`,
-      body: "Drop the task here. I'll keep the work grounded in the repo."
+      headline: `${label} Hermes nên giải quyết phần nào?`,
+      body: "Thả nhiệm vụ ở đây. Tôi sẽ giữ công việc bám sát repo."
     },
     {
-      headline: 'Where should we begin?',
-      body: `Give me the context and I'll answer in ${label} mode.`
+      headline: 'Chúng ta nên bắt đầu từ đâu?',
+      body: `Đưa bối cảnh cho tôi và tôi sẽ trả lời trong chế độ ${label}.`
     }
   ]
 }
