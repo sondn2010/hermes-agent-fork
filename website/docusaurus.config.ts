@@ -3,7 +3,7 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'Hermes Agent',
+  title: 'CNCNS Agent',
   tagline: 'The self-improving AI agent',
   favicon: 'img/favicon.ico',
 
@@ -117,9 +117,9 @@ const config: Config = {
       },
     },
     navbar: {
-      title: 'Hermes Agent',
+      title: 'CNCNS Agent',
       logo: {
-        alt: 'Hermes Agent',
+        alt: 'CNCNS Agent',
         src: 'img/logo.png',
       },
       items: [
