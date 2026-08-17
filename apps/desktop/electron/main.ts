@@ -540,6 +540,9 @@ function loadInstallStamp() {
 
   for (const p of candidates) {
     try {
+      if (!fs.existsSync(p)) {
+        continue
+      }
       const raw = fs.readFileSync(p, 'utf8')
       const parsed = JSON.parse(raw)
 
@@ -563,8 +566,8 @@ function loadInstallStamp() {
         })
       }
     } catch (e) {
-      console.warn(`[hermes] install-stamp.json found at ${p} , but parsing failed with ${e}`)
-      // Either ENOENT or malformed JSON; try the next candidate
+      console.warn(`[hermes] install-stamp.json parsing failed at ${p} with error: ${e}`)
+      // Try the next candidate
     }
   }
 
@@ -4349,7 +4352,7 @@ function resolveHermesBackend(backendArgs) {
   //    is a recoverable state the GUI can drive through.
   return {
     kind: 'bootstrap-needed',
-    label: 'Hermes Agent not installed yet; bootstrap required',
+    label: 'CNCNS Agent not installed yet; bootstrap required',
     command: null,
     args: backendArgs,
     bootstrap: true,

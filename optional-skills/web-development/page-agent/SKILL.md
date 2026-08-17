@@ -2,7 +2,7 @@
 name: page-agent
 description: Embed an in-page natural-language GUI copilot in web apps.
 version: 1.0.0
-author: Hermes Agent
+author: CNCNS Agent
 license: MIT
 platforms: [linux, macos, windows]
 metadata:

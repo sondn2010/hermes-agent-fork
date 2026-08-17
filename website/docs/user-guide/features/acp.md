@@ -1,12 +1,12 @@
 ---
 sidebar_position: 11
 title: "ACP Host Integration"
-description: "Use Hermes Agent inside ACP-compatible editors and collaboration platforms"
+description: "Use CNCNS Agent inside ACP-compatible editors and collaboration platforms"
 ---
 
 # ACP Host Integration
 
-Hermes Agent can run as an ACP server, letting ACP-compatible hosts talk to
+CNCNS Agent can run as an ACP server, letting ACP-compatible hosts talk to
 Hermes over stdio. Editors can render:
 
 - chat messages
@@ -104,7 +104,7 @@ for people and agents. Its `buzz-acp` harness connects Buzz channels to any ACP
 agent over stdio:
 
 ```text
-Buzz relay <-- WebSocket --> buzz-acp <-- ACP over stdio --> Hermes Agent
+Buzz relay <-- WebSocket --> buzz-acp <-- ACP over stdio --> CNCNS Agent
 ```
 
 This is a transport integration, not a second Hermes installation. The
@@ -178,7 +178,7 @@ Install the [ACP Client](https://marketplace.visualstudio.com/items?itemName=for
 To connect:
 
 1. Open the ACP Client panel from the Activity Bar.
-2. Select **Hermes Agent** from the built-in agent list.
+2. Select **CNCNS Agent** from the built-in agent list.
 3. Connect and start chatting.
 
 If you want to define Hermes manually, add it through VS Code settings under `acp.agents`:
@@ -186,7 +186,7 @@ If you want to define Hermes manually, add it through VS Code settings under `ac
 ```json
 {
   "acp.agents": {
-    "Hermes Agent": {
+    "CNCNS Agent": {
       "command": "hermes",
       "args": ["acp"]
     }
@@ -225,7 +225,7 @@ Use an ACP-compatible plugin and point it at `hermes acp` or `hermes-acp`.
 
 ### Buzz Desktop
 
-[Buzz](https://github.com/block/buzz) ships Hermes Agent as a preset runtime.
+[Buzz](https://github.com/block/buzz) ships CNCNS Agent as a preset runtime.
 With Hermes installed the normal way, Buzz discovers it automatically —
 open **Settings → Runtimes** and Hermes appears under your runtimes.
 

@@ -17,7 +17,7 @@ Read the live Hermes desktop DOM/CSS over CDP.
 | Source | Bundled (installed by default) |
 | Path | `skills/software-development/inspecting-hermes-desktop-dom` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | CNCNS Agent |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `desktop`, `electron`, `cdp`, `dom`, `ui-verification`, `self-inspection` |

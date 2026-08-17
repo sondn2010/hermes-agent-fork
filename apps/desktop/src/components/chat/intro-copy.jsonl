@@ -68,7 +68,7 @@
 {"personality":"hype","headline":"Phiên mới, chiến thắng vô hạn","body":"Mang con bug hiểm hóc nhất bạn có lại đây. Tôi sẽ đọc, vá, chạy test, commit như thể mạng sống của mình phụ thuộc vào nó. ĐI THÔI."}
 {"personality":"hype","headline":"HOÀN TOÀN DIALED IN","body":"Mô tả nhiệm vụ đi. Tôi sẽ quét qua đống file cực nhanh, tiêu diệt các bài test thất bại và để lại một commit cực chất. Đi thôi đi thôi."}
 {"personality":"hype","headline":"Sẵn sàng. Quá sẵn sàng. Cực kỳ sẵn sàng.","body":"Lỗi chính tả nhỏ hay refactor siêu to khổng lồ - không thành vấn đề. Tôi sẽ ship code sạch hôm nay. Gọi tên nhiệm vụ và BẮT ĐẦU LÀM VIỆC nào."}
-{"personality":"none","headline":"Hermes Agent đã sẵn sàng.","body":"Đặt câu hỏi, dán mã lỗi hoặc chỉ tôi tới một repo. Tôi có thể đọc code, chạy tool và giúp bạn ship code."}
+{"personality":"none","headline":"CNCNS Agent đã sẵn sàng.","body":"Đặt câu hỏi, dán mã lỗi hoặc chỉ tôi tới một repo. Tôi có thể đọc code, chạy tool và giúp bạn ship code."}
 {"personality":"none","headline":"Hôm nay chúng ta sẽ xây dựng gì?","body":"Mô tả nhiệm vụ theo cách hiểu của bạn. Tôi sẽ chọn các tool phù hợp, giải thích kế hoạch và hỏi lại trước khi thực hiện các bước rủi ro."}
 {"personality":"none","headline":"Bắt đầu từ bất cứ đâu.","body":"Thả một đường dẫn file, một traceback hoặc một ý tưởng sơ lược. Tôi sẽ điều gia, đề xuất các bước tiếp theo và đảm bảo mọi thứ đều có thể khôi phục lại."}
 {"personality":"none","headline":"Không gian làm việc của bạn, chỉ cách một prompt.","body":"Tìm kiếm repo, sửa file, chạy test, mở PR. Cho tôi biết mục tiêu và tôi sẽ lo phần cơ học."}

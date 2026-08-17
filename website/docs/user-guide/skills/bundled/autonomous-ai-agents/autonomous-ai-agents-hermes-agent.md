@@ -1,14 +1,14 @@
 ---
-title: "Hermes Agent — Use, configure, theme, extend, and orchestrate Hermes Agent"
-sidebar_label: "Hermes Agent"
-description: "Use, configure, theme, extend, and orchestrate Hermes Agent"
+title: "CNCNS Agent — Use, configure, theme, extend, and orchestrate CNCNS Agent"
+sidebar_label: "CNCNS Agent"
+description: "Use, configure, theme, extend, and orchestrate CNCNS Agent"
 ---
 
 {/* This page is auto-generated from the skill's SKILL.md by website/scripts/generate-skill-docs.py. Edit the source SKILL.md, not this page. */}
 
-# Hermes Agent
+# CNCNS Agent
 
-Use, configure, theme, extend, and orchestrate Hermes Agent.
+Use, configure, theme, extend, and orchestrate CNCNS Agent.
 
 ## Skill metadata
 
@@ -17,7 +17,7 @@ Use, configure, theme, extend, and orchestrate Hermes Agent.
 | Source | Bundled (installed by default) |
 | Path | `skills/autonomous-ai-agents/hermes-agent` |
 | Version | `3.1.0` |
-| Author | Hermes Agent + Teknium |
+| Author | CNCNS Agent + Teknium |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `hermes`, `setup`, `configuration`, `multi-agent`, `spawning`, `cli`, `gateway`, `themes`, `skins`, `desktop-plugins`, `tui-widgets`, `petdex`, `development` |
@@ -29,9 +29,9 @@ Use, configure, theme, extend, and orchestrate Hermes Agent.
 The following is the complete skill definition that Hermes loads when this skill is triggered. This is what the agent sees as instructions when the skill is active.
 :::
 
-# Hermes Agent
+# CNCNS Agent
 
-Hermes Agent is an open-source AI agent framework by Nous Research that runs in your terminal, a native desktop app, messaging platforms, and IDEs. It's in the same category as Claude Code (Anthropic), Codex (OpenAI), and OpenClaw — autonomous coding and task-execution agents that use tool calling to interact with your system. Hermes works with any LLM provider (OpenRouter, Anthropic, OpenAI, Google, DeepSeek, xAI, local models, and 20+ others) and runs on Linux, macOS, Windows, and WSL.
+CNCNS Agent is an open-source AI agent framework by Nous Research that runs in your terminal, a native desktop app, messaging platforms, and IDEs. It's in the same category as Claude Code (Anthropic), Codex (OpenAI), and OpenClaw — autonomous coding and task-execution agents that use tool calling to interact with your system. Hermes works with any LLM provider (OpenRouter, Anthropic, OpenAI, Google, DeepSeek, xAI, local models, and 20+ others) and runs on Linux, macOS, Windows, and WSL.
 
 What makes Hermes different:
 

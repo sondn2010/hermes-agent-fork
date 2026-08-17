@@ -17,7 +17,7 @@ Recover blocked/paywalled/WAF'd pages via archive snapshots and reader fallbacks
 | Source | Bundled (installed by default) |
 | Path | `skills/research/blocked-page-recovery` |
 | Version | `1.0.0` |
-| Author | Hermes Agent |
+| Author | CNCNS Agent |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Research`, `Archives`, `Wayback`, `Paywall`, `WAF`, `Fallback` |

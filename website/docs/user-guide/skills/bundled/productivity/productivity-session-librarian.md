@@ -17,7 +17,7 @@ Organize sessions by prompt: find, rename, archive, prune.
 | Source | Bundled (installed by default) |
 | Path | `skills/productivity/session-librarian` |
 | Version | `1.0.0` |
-| Author | Hermes Agent + Teknium |
+| Author | CNCNS Agent + Teknium |
 | License | MIT |
 | Platforms | linux, macos, windows |
 | Tags | `Sessions`, `Organization`, `Cleanup`, `Library`, `Productivity` |

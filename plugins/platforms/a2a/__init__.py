@@ -1,5 +1,5 @@
 """
-A2A (Agent-to-Agent) plugin for Hermes Agent.
+A2A (Agent-to-Agent) plugin for CNCNS Agent.
 
 Registers:
   - The ``a2a`` platform adapter (inbound: exposes Hermes as an A2A agent,
