@@ -6,7 +6,7 @@ description: "逐步指南：为整个团队搭建一个 Telegram 机器人，�
 
 # 搭建团队 Telegram 助手
 
-本教程将引导你搭建一个由 CNCNS Agent 驱动的 Telegram 机器人，供多名团队成员使用。完成后，你的团队将拥有一个共享 AI 助手，可以向它发消息寻求代码、研究、系统管理等方面的帮助——并通过按用户授权保障安全。
+本教程将引导你搭建一个由 Hermes Agent 驱动的 Telegram 机器人，供多名团队成员使用。完成后，你的团队将拥有一个共享 AI 助手，可以向它发消息寻求代码、研究、系统管理等方面的帮助——并通过按用户授权保障安全。
 
 ## 我们要构建什么
 
@@ -24,7 +24,7 @@ description: "逐步指南：为整个团队搭建一个 Telegram 机器人，�
 
 开始前，请确保你已具备：
 
-- **已在服务器或 VPS 上安装 CNCNS Agent**（不是你的笔记本——机器人需要持续运行）。如尚未安装，请参阅[安装指南](/getting-started/installation)。
+- **已在服务器或 VPS 上安装 Hermes Agent**（不是你的笔记本——机器人需要持续运行）。如尚未安装，请参阅[安装指南](../getting-started/installation.md)。
 - **一个 Telegram 账号**（机器人所有者）
 - **已配置 LLM 提供商**——至少在 `~/.hermes/.env` 中配置了 OpenAI、Anthropic 或其他受支持提供商的 API 密钥
 
@@ -57,7 +57,7 @@ description: "逐步指南：为整个团队搭建一个 Telegram 机器人，�
    ```
    选择你的机器人，然后输入类似内容：
    ```
-   Team AI assistant powered by CNCNS Agent. DM me for help with code, research, debugging, and more.
+   Team AI assistant powered by Hermes Agent. DM me for help with code, research, debugging, and more.
    ```
 
 5. **设置机器人命令**（可选——为用户提供命令菜单）：
@@ -291,7 +291,7 @@ display:
 
 通过编辑 `~/.hermes/SOUL.md` 自定义机器人的沟通方式：
 
-完整指南请参阅[在 Hermes 中使用 SOUL.md](/guides/use-soul-with-hermes)。
+完整指南请参阅[在 Hermes 中使用 SOUL.md](./use-soul-with-hermes.md)。
 
 ```markdown
 # Soul
@@ -428,13 +428,13 @@ hermes gateway stop && hermes gateway start
 
 你已经拥有一个可用的团队 Telegram 助手。以下是一些后续步骤：
 
-- **[安全指南](/user-guide/security)**——深入了解授权、容器隔离和命令审批
-- **[消息 Gateway](/user-guide/messaging)**——gateway 架构、会话管理和聊天命令的完整参考
-- **[Telegram 设置](/user-guide/messaging/telegram)**——平台专属详情，包括语音消息和 TTS
-- **[定时任务](/user-guide/features/cron)**——高级 cron 调度，含投递选项和 cron 表达式
-- **[上下文文件](/user-guide/features/context-files)**——用于项目知识的 AGENTS.md、SOUL.md 和 .cursorrules
-- **[个性设置](/user-guide/features/personality)**——内置个性预设和自定义角色定义
-- **添加更多平台**——同一 gateway 可同时运行 [Discord](/user-guide/messaging/discord)、[Slack](/user-guide/messaging/slack) 和 [WhatsApp](/user-guide/messaging/whatsapp)
+- **[安全指南](../user-guide/security.md)**——深入了解授权、容器隔离和命令审批
+- **[消息 Gateway](../user-guide/messaging/index.md)**——gateway 架构、会话管理和聊天命令的完整参考
+- **[Telegram 设置](../user-guide/messaging/telegram.md)**——平台专属详情，包括语音消息和 TTS
+- **[定时任务](../user-guide/features/cron.md)**——高级 cron 调度，含投递选项和 cron 表达式
+- **[上下文文件](../user-guide/features/context-files.md)**——用于项目知识的 AGENTS.md、SOUL.md 和 .cursorrules
+- **[个性设置](../user-guide/features/personality.md)**——内置个性预设和自定义角色定义
+- **添加更多平台**——同一 gateway 可同时运行 [Discord](../user-guide/messaging/discord.md)、[Slack](../user-guide/messaging/slack.md) 和 [WhatsApp](../user-guide/messaging/whatsapp.md)
 
 ---
 

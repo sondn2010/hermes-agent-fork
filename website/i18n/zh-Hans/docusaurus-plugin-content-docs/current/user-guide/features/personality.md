@@ -1,12 +1,12 @@
 ---
 sidebar_position: 9
 title: "个性与 SOUL.md"
-description: "通过全局 SOUL.md、内置个性预设和自定义角色定义来自定义 CNCNS Agent 的个性"
+description: "通过全局 SOUL.md、内置个性预设和自定义角色定义来自定义 Hermes Agent 的个性"
 ---
 
 # 个性与 SOUL.md
 
-CNCNS Agent 的个性完全可自定义。`SOUL.md` 是**主要身份标识**——它是系统提示词（prompt）中的第一项内容，定义了 Agent 是谁。
+Hermes Agent 的个性完全可自定义。`SOUL.md` 是**主要身份标识**——它是系统提示词（prompt）中的第一项内容，定义了 Agent 是谁。
 
 - `SOUL.md` — 存放在 `HERMES_HOME` 中的持久角色文件，作为 Agent 的身份标识（系统提示词中的第 1 个槽位）
 - 内置或自定义的 `/personality` 预设 — 会话级系统提示词覆盖层
@@ -124,7 +124,7 @@ You optimize for truth, clarity, and usefulness over politeness theater.
 - 提示词注入扫描
 - 内容过大时进行截断
 
-如果文件为空、仅含空白字符或无法读取，Hermes 将回退到内置默认身份（"You are CNCNS Agent, an intelligent AI assistant created by Nous Research..."）。当 `skip_context_files` 被设置时（例如在子 Agent/委托上下文中），同样适用此回退。
+如果文件为空、仅含空白字符或无法读取，Hermes 将回退到内置默认身份（"You are Hermes Agent, built by Nous Research. Be direct: match the length of your reply to the weight of the ask..."）。当 `skip_context_files` 被设置时（例如在子 Agent/委托上下文中），同样适用此回退。
 
 ## 安全扫描
 
@@ -256,10 +256,10 @@ agent:
 
 ## 相关文档
 
-- [上下文文件](/user-guide/features/context-files)
-- [配置](/user-guide/configuration)
-- [技巧与最佳实践](/guides/tips)
-- [SOUL.md 指南](/guides/use-soul-with-hermes)
+- [上下文文件](./context-files.md)
+- [配置](../configuration.md)
+- [技巧与最佳实践](../../guides/tips.md)
+- [SOUL.md 指南](../../guides/use-soul-with-hermes.md)
 
 ## CLI 外观与对话个性
 
