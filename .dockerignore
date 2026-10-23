@@ -126,3 +126,6 @@ plans/
 /*.png.bak
 *.tar.gz
 *.tgz
+
+# Docker Hub credentials for tools-devops build scripts
+tools-devops/.env
