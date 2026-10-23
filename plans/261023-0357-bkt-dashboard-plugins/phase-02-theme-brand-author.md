@@ -1,7 +1,7 @@
 ---
 phase: 2
 title: "Theme, brand logo and author"
-status: pending
+status: completed
 priority: P1
 effort: "0.5d"
 dependencies: [1]
@@ -11,8 +11,23 @@ dependencies: [1]
 
 ## Goal
 
-Ship the BKT theme, put the company logo in the header and show the author footer, all without
-core changes.
+Ship the BKT theme, put the company logo in the sidebar header and show the author line, all
+without core changes.
+
+## Context
+
+- The rendered shell slots are `backdrop`, `header-banner`, `header-left`, `header-right`,
+  `pre-main`, `post-main` and `overlay` (`web/src/App.tsx:526,577,618,729,771,826,832`).
+- `footer-left` and `footer-right` are declared in `web/src/plugins/slots.ts:31-32,70-71` but
+  never rendered. The sidebar footer is the hardcoded `SidebarFooter`
+  (`web/src/components/SidebarFooter.tsx`). BKT must not use the footer slots.
+  <!-- Red Team: footer-right slot is never rendered -->
+- `header-left` sits inside a container that is hidden while the sidebar is collapsed
+  (`web/src/App.tsx:612-618`).
+- The theme emits `--theme-asset-logo` and `--theme-asset-logo-raw`
+  (`web/src/themes/context.tsx:202-221`), but no shell component uses them. A theme
+  `assets.logo` value is also an absolute URL that drops `HERMES_BASE_PATH`. The logo is
+  therefore rendered only by the plugin, from its own asset URL.
 
 ## Files to create
 
@@ -28,23 +43,28 @@ core changes.
     - `border` is a low-alpha indigo.
   - **`componentStyles`:** the header and sidebar use `#212428`, and cards get an indigo
     hairline border.
-  - **`assets.logo`:** `/dashboard-plugins/bkt-brand/assets/logo.png`.
   - **`customCSS`:** a cyan focus ring, a cyan pulse keyframe for live generation, and an
-    indigo surface for `[data-tool]` blocks. The total stays under the 32 KiB cap.
+    indigo surface for `[data-tool]` blocks. The server truncates `customCSS` silently at
+    32 KiB (`hermes_cli/web_server_dashboard.py:318`), so keep it under 8 KiB.
+  - It sets no `assets.logo`.
 - `plugins/bkt-brand/dashboard/manifest.json` declares a hidden tab and the `header-left` slot.
-- `plugins/bkt-brand/dashboard/assets/logo.png` is a copy of the root `Logo.png`. The untracked
-  root `Logo.png` stays untouched.
+- `plugins/bkt-brand/dashboard/assets/logo.png` is a copy of the root `Logo.png`, which is
+  tracked and stays untouched.
 - `bkt/packages/brand/src/index.tsx`:
-  - The `header-left` slot renders the logo at about 28px high.
-  - It reads `--theme-asset-logo-raw` when the active theme provides one and falls back to the
-    plugin's own asset otherwise, so the logo also shows under other themes.
-  - It sets the favicon to the logo.
-- `plugins/bkt-author/dashboard/manifest.json` declares the `footer-right` slot and the
+  - The `header-left` slot renders the logo at about 28px high, from `selfAssetUrl` (phase 1),
+    so the base path and profile segment hold. It works under every theme.
+  - It sets the favicon to the same URL.
+  - While the sidebar is collapsed, `header-left` is hidden and the logo is not shown. This is
+    accepted, and the favicon still carries the brand.
+- `plugins/bkt-author/dashboard/manifest.json` declares the `post-main` slot and the
   `/bkt-about` tab, with `position: end` and icon `Heart`.
 - `bkt/packages/author/src/index.tsx`:
-  - The footer shows "Son Do · sondn2010@gmail.com", where the address is a `mailto:` link.
+  - The `post-main` slot renders a small muted line under the page content: "Son Do ·
+    sondn2010@gmail.com", where the address is a `mailto:` link.
   - The About page shows the author, the company and the logo. It lists the installed `bkt-*`
     plugins with their versions from `/api/dashboard/plugins`.
+  <!-- Red Team: author line moved from footer-right to post-main -->
+  <!-- Updated: Validation Session 1 - user confirmed post-main strip plus the About tab -->
 
 ## Steps
 
@@ -56,11 +76,12 @@ core changes.
 ## Verification
 
 - `curl /api/dashboard/themes` lists `bkt`, and selecting it persists `dashboard.theme`.
-- The logo shows in the header under the bkt theme and under the default theme.
-- The footer shows the author line and the About tab renders.
+- The logo shows in the sidebar header under the bkt theme and the default theme, and under a
+  non-default profile (`/dashboard-plugins/@<profile>/...`).
+- The author line shows under the page content, and the About tab renders.
 - check-additive passes.
 
 ## Risks
 
-- `footer-right` replaces the default footer content. This is accepted because the footer
-  belongs to the brand.
+- The `post-main` line appears on every page, including Chat. Keep it a single muted line so it
+  does not compete with page content.
