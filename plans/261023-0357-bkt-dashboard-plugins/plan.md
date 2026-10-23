@@ -123,10 +123,8 @@ existing shared file goes back through the owner of phase 1.
 - [x] `node bkt/scripts/check-additive.mjs` passes. With the default base `main-bktech`, it
       requires `git diff --name-status <merge-base>...HEAD` to show no `M`, `D` or `R` entry
       outside `plans/`, and no `A` entry outside `plans/` and the allowed new roots.
-- [ ] `node bkt/scripts/check-dist-fresh.mjs` passes, meaning a clean rebuild leaves
-      `plugins/bkt-*/dashboard/dist` unchanged in git. Pending the first commit of the BKT files;
-      a clean rebuild already reproduces all 16 bundle files byte for byte, and the script passed
-      on the committed sync-rehearsal tree.
+- [x] `node bkt/scripts/check-dist-fresh.mjs` passes, meaning a clean rebuild leaves
+      `plugins/bkt-*/dashboard/dist` unchanged in git.
 - [x] A trial merge of upstream `main` into a scratch branch adds no conflict in any BKT-owned
       path. Conflicts in files from the existing rebrand baseline are recorded but not counted.
 - [x] `/api/dashboard/plugins` lists exactly the eight `bkt-*` plugins named above. Each tab or
@@ -303,5 +301,4 @@ existing shared file goes back through the owner of phase 1.
   failed on the unfixed code. The Critical finding (Unicode aliases of credential names) also
   affects core `_is_sensitive_filename`. That core issue is left for a private report under
   `SECURITY.md`; no public issue was filed.
-- Still open: native Windows and WSL manual runs, including the four Windows-only tests, and
-  `check-dist-fresh` after the first commit.
+- Still open: native Windows and WSL manual runs, including the four Windows-only tests.
