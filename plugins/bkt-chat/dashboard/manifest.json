@@ -1,0 +1,13 @@
+{
+  "name": "bkt-chat",
+  "label": "BKT Chat",
+  "description": "React chat over the /api/ws JSON-RPC gateway: markdown, mermaid, tool calls, approvals and clarifying questions. Works on native Windows.",
+  "icon": "MessageSquare",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/bkt-chat",
+    "position": "end"
+  },
+  "entry": "dist/index.js",
+  "css": "dist/style.css"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "bkt-profiles",
+  "label": "Profile Workbench",
+  "description": "Per-profile workbench: SOUL, messaging, pairing, API server key, clone, export and import.",
+  "icon": "Users",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/bkt-profiles",
+    "position": "end"
+  },
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

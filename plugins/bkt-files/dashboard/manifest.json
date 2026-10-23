@@ -1,0 +1,14 @@
+{
+  "name": "bkt-files",
+  "label": "Files+",
+  "description": "Extended file manager: folder upload, move, rename, copy, zip and unzip, search and inline preview and editing.",
+  "icon": "FolderOpen",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/bkt-files",
+    "position": "end"
+  },
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

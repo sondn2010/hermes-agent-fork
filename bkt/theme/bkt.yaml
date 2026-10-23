@@ -1,0 +1,82 @@
+# BachKhoa Technology dashboard theme. Installed into <home>/dashboard-themes/ by bkt/install.mjs.
+# Tertiary lime (#A2D149) is reserved for success states. No assets.logo: the bkt-brand plugin
+# renders the logo from its own asset URL so the base path and profile segment always hold.
+name: bkt
+label: BachKhoa Technology
+description: BKT brand theme — cyan primary, indigo secondary, graphite surfaces.
+
+palette:
+  background:
+    hex: "#0E1012"
+    alpha: 1
+  midground:
+    hex: "#F0F4F8"
+    alpha: 1
+  foreground:
+    hex: "#00ADEF"
+    alpha: 0.06
+  warmGlow: "rgba(0, 173, 239, 0.18)"
+  noiseOpacity: 0.4
+
+typography:
+  fontSans: 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+  fontMono: 'ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace'
+  baseSize: "15px"
+  lineHeight: "1.55"
+
+layout:
+  radius: "0.5rem"
+  density: comfortable
+
+colorOverrides:
+  card: "#1A1C1E"
+  cardForeground: "#F0F4F8"
+  popover: "#282B30"
+  popoverForeground: "#F0F4F8"
+  muted: "#212428"
+  mutedForeground: "#94A3B8"
+  primary: "#00ADEF"
+  primaryForeground: "#0E1012"
+  ring: "#00ADEF"
+  secondary: "#3F51B5"
+  secondaryForeground: "#F0F4F8"
+  accent: "#282B30"
+  accentForeground: "#F0F4F8"
+  success: "#A2D149"
+  border: "rgba(63, 81, 181, 0.35)"
+  input: "rgba(63, 81, 181, 0.45)"
+
+componentStyles:
+  header:
+    background: "#212428"
+  sidebar:
+    background: "#212428"
+
+customCSS: |
+  :root {
+    --bkt-primary: #00adef;
+    --bkt-secondary: #3f51b5;
+    --bkt-tertiary: #a2d149;
+  }
+  :focus-visible {
+    outline: 2px solid #00adef;
+    outline-offset: 2px;
+  }
+  [data-slot="card"], .card {
+    border: 1px solid rgba(63, 81, 181, 0.45);
+  }
+  [data-tool] {
+    background: rgba(63, 81, 181, 0.14);
+    border: 1px solid rgba(63, 81, 181, 0.4);
+    border-radius: 0.5rem;
+  }
+  @keyframes bkt-live-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 173, 239, 0.55); }
+    50% { box-shadow: 0 0 0 6px rgba(0, 173, 239, 0); }
+  }
+  [data-generating="true"], .bkt-live {
+    animation: bkt-live-pulse 1.6s ease-in-out infinite;
+  }
+  ::selection {
+    background: rgba(0, 173, 239, 0.35);
+  }

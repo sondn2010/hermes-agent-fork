@@ -1,0 +1,14 @@
+{
+  "name": "bkt-kanban-workflow",
+  "label": "Kanban Flow",
+  "description": "Graph of how kanban work flows between profiles, with live run overlays.",
+  "icon": "Activity",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/bkt-kanban-flow",
+    "position": "end"
+  },
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

@@ -1,0 +1,7 @@
+.bkt-prompts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 0.75rem; }
+.bkt-prompt-body { white-space: pre-wrap; max-height: 7.5em; overflow: hidden; font-size: 0.85rem; }
+.bkt-prompts-preview { border: 1px solid var(--bkt-border); border-radius: 6px; padding: 0.6rem; min-height: 6rem; max-height: 24rem; overflow: auto; }
+.bkt-prompts-profile { width: auto; }
+.bkt-prompts-search { min-width: 12rem; }
+.bkt-var { margin-right: 0.35rem; color: var(--bkt-primary); }
+button.bkt-badge { background: none; cursor: pointer; }
