@@ -24,13 +24,17 @@ checked against a real Zalo account.
 
 ## Tasks & Steps
 
-1. [ ] Write the docs from the implemented code, not from this plan.
-2. [ ] Live run on the test account: DM reply; group @mention reply; unaddressed group line ignored;
-       inbound image and file reach the agent; outbound image send.
-3. [ ] Stop the gateway and confirm no `openzca` Node process survives (Windows:
+1. [ ] Run `npm view openzca version` and record the current version in `docs/bkt/zalo.md` as the
+       minimum pinned version. Update the `install_hint` in `adapter.py` task 1 to use this version.
+2. [ ] Write the docs from the implemented code, not from this plan.
+3. [ ] Live run on the dedicated test account (confirmed available): DM reply; group @mention
+       reply; unaddressed group line ignored; inbound image and file reach the agent; outbound
+       image send. Run in one short session with fixed message counts; abort and record partial
+       evidence on any login warning or account lock.
+4. [ ] Stop the gateway and confirm no `openzca` Node process survives (Windows:
        `Get-CimInstance Win32_Process -Filter "Name='node.exe'" | ? CommandLine -match 'openzca'`).
-4. [ ] `node bkt/scripts/check-additive.mjs` reports only additive changes.
-5. [ ] Tick the acceptance boxes in `plan.md` with the evidence.
+5. [ ] `node bkt/scripts/check-additive.mjs` reports only additive changes.
+6. [ ] Tick the acceptance boxes in `plan.md` with the evidence.
 
 ## Verification
 
