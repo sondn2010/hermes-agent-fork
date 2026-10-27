@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // Install the BKT dashboard extras into a Hermes checkout and its homes.
 //
-//   node bkt/install.mjs                 build everything, install the theme in every home
-//   node bkt/install.mjs --home <dir>    install the theme only into <dir>
+//   node bkt/install.mjs                 build everything, install theme + skin in every home
+//   node bkt/install.mjs --home <dir>    install theme + skin only into <dir>
 //   node bkt/install.mjs --skip-npm      reuse bkt/node_modules (offline re-run)
+//   node bkt/install.mjs --force         overwrite skins that already exist in a home
 //
-// The dashboard reads themes from the home it was launched with, so by default the theme goes
-// into the root home and every profile home. Homes come from Hermes itself, never a fixed path.
+// The dashboard reads themes (and the CLI/TUI/Desktop read skins) from the home they were launched
+// with, so by default both go into the root home and every profile home. Homes come from Hermes
+// itself, never a fixed path. Skins are user-editable, so an existing one is kept unless --force.
 import { execFileSync, spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
@@ -15,15 +17,17 @@ import { fileURLToPath } from "node:url";
 const BKT = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(BKT, "..");
 const THEME_DIR = join(BKT, "theme");
+const SKIN_DIR = join(THEME_DIR, "skins");
 const IS_WINDOWS = process.platform === "win32";
 
 function parseArgs(argv) {
-  const args = { home: null, skipNpm: false };
+  const args = { home: null, skipNpm: false, force: false };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--home") args.home = argv[++i];
     else if (argv[i] === "--skip-npm") args.skipNpm = true;
+    else if (argv[i] === "--force") args.force = true;
     else if (argv[i] === "--help" || argv[i] === "-h") {
-      console.log("usage: node bkt/install.mjs [--home <dir>] [--skip-npm]");
+      console.log("usage: node bkt/install.mjs [--home <dir>] [--skip-npm] [--force]");
       process.exit(0);
     } else {
       console.error(`unknown argument: ${argv[i]}`);
@@ -71,13 +75,34 @@ export function homesFromConfigPath(configPath) {
   return homes;
 }
 
-function installTheme(homes) {
-  const themes = readdirSync(THEME_DIR).filter((f) => f.endsWith(".yaml")).sort();
+const yamlFiles = (dir) => readdirSync(dir).filter((f) => f.endsWith(".yaml")).sort();
+
+/** Copy every dashboard theme into ``<home>/dashboard-themes/`` (always overwrites). */
+export function installTheme(homes) {
+  const themes = yamlFiles(THEME_DIR);
   for (const home of homes) {
     const target = join(home, "dashboard-themes");
     mkdirSync(target, { recursive: true });
     for (const theme of themes) copyFileSync(join(THEME_DIR, theme), join(target, theme));
     console.log(`theme  ${target}`);
+  }
+}
+
+/** Copy every CLI/TUI skin into ``<home>/skins/``; an existing skin is kept unless ``force``. */
+export function installSkins(homes, { force = false } = {}) {
+  const skins = yamlFiles(SKIN_DIR);
+  for (const home of homes) {
+    const dir = join(home, "skins");
+    mkdirSync(dir, { recursive: true });
+    for (const skin of skins) {
+      const target = join(dir, skin);
+      if (!force && existsSync(target)) {
+        console.log(`skin  ${target} (exists, kept; --force to overwrite)`);
+        continue;
+      }
+      copyFileSync(join(SKIN_DIR, skin), target);
+      console.log(`skin  ${target}`);
+    }
   }
 }
 
@@ -98,8 +123,10 @@ function main() {
     homes = homesFromConfigPath(configPath);
   }
   installTheme(homes);
+  installSkins(homes, { force: args.force });
   console.log("\nDone. Restart the dashboard if it is running: plugin API routes mount at startup.");
-  console.log("Then pick the BachKhoa Technology theme in the dashboard's theme picker.");
+  console.log("Then pick the BachKhoa Technology theme in the dashboard's theme picker,");
+  console.log("and run `/skin bkt` in the CLI, TUI or Desktop to apply the BKT skin.");
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

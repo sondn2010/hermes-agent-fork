@@ -13,17 +13,27 @@ node bkt/install.mjs              # WSL / Linux / macOS (or: sh bkt/install.sh)
 powershell bkt\install.ps1        # native Windows
 ```
 
-The installer does three things:
+The installer does four things:
 
 1. It runs `npm --prefix bkt ci`.
 2. It builds the plugins plus the mermaid diagram renderer. Mermaid is about 3.4 MB, so it is
    built locally and never committed.
-3. It copies the theme into the root Hermes home and every profile home, which it finds through
-   `hermes config path`.
+3. It copies the BKT dashboard theme into the root Hermes home and every profile home.
+4. It copies the BKT CLI/TUI skin (`bkt.yaml`) into `<home>/skins/` for each home.
 
-Use `--home <dir>` to install the theme into a single home, and `--skip-npm` to reuse
-`bkt/node_modules`. Restart a running dashboard afterwards, because plugin API routes are
-mounted at startup.
+Use `--home <dir>` to install into a single home, `--skip-npm` to reuse `bkt/node_modules`,
+and `--force` to overwrite an existing skin file you may have edited. Restart a running
+dashboard afterwards, because plugin API routes are mounted at startup.
+
+## CLI/TUI skin
+
+Run `/skin bkt` in the Hermes CLI to apply BKT brand colors (cyan primary, indigo secondary,
+graphite surfaces) to the CLI, TUI, and Desktop app. The skin is installed into
+`<home>/skins/bkt.yaml` by `bkt/install.mjs`.
+
+## Messaging: Zalo
+
+See [`zalo.md`](zalo.md) for setup instructions.
 
 The plugins are bundled with the checkout, so you do not need a `plugins.enabled` entry. To turn
 one off, add it to `plugins.disabled` in that profile's `config.yaml`.

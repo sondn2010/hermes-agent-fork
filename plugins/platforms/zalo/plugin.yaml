@@ -1,0 +1,34 @@
+name: zalo-platform
+label: Zalo
+kind: platform
+version: 1.0.0
+description: >
+  Zalo gateway adapter for Hermes Agent.
+  Drives a personal Zalo account through the openzca CLI.
+author: BKT
+requires_env:
+  - name: ZALO_PROFILE
+    description: "openzca profile name to use"
+    prompt: "openzca profile name"
+    password: false
+optional_env:
+  - name: ZALO_ALLOWED_USERS
+    description: "Comma-separated Zalo UIDs allowed to talk to the bot"
+    prompt: "Allowed UIDs (comma-separated)"
+    password: false
+  - name: ZALO_ALLOW_ALL_USERS
+    description: "Allow anyone to talk to the bot"
+    prompt: "Allow all users? (true/false)"
+    password: false
+  - name: ZALO_HOME_THREAD
+    description: "Thread ID for cron/notification delivery"
+    prompt: "Home thread ID"
+    password: false
+  - name: ZALO_GROUP_REQUIRE_MENTION
+    description: "Require @mention in groups (default: true)"
+    prompt: "Require mention? (true/false)"
+    password: false
+  - name: ZALO_OPENZCA_BIN
+    description: "Explicit path to openzca (overrides PATH lookup)"
+    prompt: "openzca binary path (optional)"
+    password: false

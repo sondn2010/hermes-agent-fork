@@ -37,11 +37,14 @@ group lines are ignored.
 3. [ ] Adapter: for group lines, skip unless `require_mention` is false or `is_addressed`; build the
        source with `chat_id="group:<threadId>"`, `chat_type="group"`,
        `chat_name=metadata.threadName`; set `reply_to_is_own_message` when the quote owner is the bot.
-4. [ ] `require_mention` comes from `_env_or_extra(extra, "ZALO_GROUP_REQUIRE_MENTION",
-       "group_require_mention", True)`, seeded through `_env_enablement`.
+4. [ ] `require_mention` is read with `_env_or_extra(extra, "ZALO_GROUP_REQUIRE_MENTION",
+       "group_require_mention", True)` and then parsed against the `_TRUTHY` set (mirror
+       `irc/adapter.py:131-132`) so that the env string `"false"` / `"0"` / `"no"` correctly
+       disables the guard. Do not rely on Python truthiness of the raw env string.
 5. [ ] Tests: mention passes and is stripped; unaddressed line dropped; reply-to-bot passes; sticker
-       bogus mention dropped; `require_mention: false` passes everything; group send uses `--group`
-       and the bare group ID.
+       bogus mention dropped; `require_mention: false` (YAML/extra path) passes everything;
+       `ZALO_GROUP_REQUIRE_MENTION=false` (env string path) also passes everything; group send uses
+       `--group` and the bare group ID.
 
 ## Verification
 
