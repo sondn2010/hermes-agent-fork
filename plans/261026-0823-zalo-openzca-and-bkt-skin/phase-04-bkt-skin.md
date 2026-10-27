@@ -32,8 +32,10 @@ surfaces through `customCSS`, and `bkt/install` puts the skin in place.
 
 | Skin key(s) | Value | Role |
 |---|---|---|
+| `background` | `#0E1012` | Desktop canvas seed (`skin.ts:60` reads this first); **must be set** or Desktop defaults to `#212428` |
+| `ui_border`, `banner_border`, `session_border` | `rgba(63,81,181,.35)` | Desktop border token (`:74-75`); `banner_border` alone yields full-saturation blue |
 | `ui_accent`, `banner_title`, `banner_accent`, `prompt`, `input_rule`, `response_border`, `status_bar_strong`, `shell_dollar` | `#00ADEF` | primary pulse: focus, active markers, generation |
-| `banner_border`, `session_border`, `ui_label`, `session_label` | `#3F51B5` | secondary framing, badges, tool surfaces |
+| `ui_label`, `session_label` | `#3F51B5` | secondary framing, badges, tool surfaces |
 | `ui_ok`, `status_bar_good` | `#A2D149` | validation only |
 | `status_bar_bg`, `completion_menu_bg`, `voice_status_bg` | `#212428` | elevated panels |
 | `completion_menu_current_bg`, `selection_bg` | `#282B30` | floating / selected |
@@ -57,16 +59,22 @@ indicators.
 
 ## Tasks & Steps
 
-1. [ ] Read `apps/desktop/src/themes/skin.ts` and `classic-skin.test.tsx` to learn whether Desktop
-       derives its palette from skin `colors` and whether theme variables are applied inline (then
-       `customCSS` needs `!important` to win). Record the finding in the YAML header comment.
+1. [ ] Read `apps/desktop/src/themes/skin.ts` and `context.tsx:307,389` to confirm that Desktop
+       applies every `--dt-*` token via `root.style.setProperty` (inline style), which wins over
+       any stylesheet. All `customCSS` rules that override those tokens **must use `!important`**.
+       Confirm the converter seeds the canvas from `colors.background` (`skin.ts:60`) and the
+       border from `ui_border` / `banner_border` (`:74-75`). Record findings in the YAML header
+       comment.
 2. [ ] Write `bkt/theme/skins/bkt.yaml` with `name: bkt`, a description, the mapped `colors`, and
        `customCSS`. Add `light_colors` only if validation decides so (see plan.md unresolved
        questions).
-3. [ ] Extend `install.mjs` and its test.
+3. [ ] Export `installTheme` and add `installSkins(homes)` as named exports in `install.mjs`
+       (the test imports them directly). `installSkins` skips an existing `bkt.yaml` unless
+       `--force` is passed, to avoid silently overwriting user edits.
 4. [ ] Load-check: `python -c "from hermes_cli.skin_engine import load_skin; print(load_skin('bkt'))"`
-       under a temp `HERMES_HOME` with the skin installed (use the real loader name found in
-       `skin_engine.py`).
+       under a temp `HERMES_HOME` with the skin installed. Assert that the `customCSS` field
+       contains no `url(`, `@import`, or `@font-face` (keep it to custom-property assignments and
+       `!important` overrides only); add this assertion to `install.test.ts`.
 
 ## Verification
 
