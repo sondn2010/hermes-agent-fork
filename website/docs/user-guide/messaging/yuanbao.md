@@ -1,27 +1,21 @@
 ---
 sidebar_position: 16
 title: "Yuanbao"
-description: "Connect CNCNS Agent to the Yuanbao enterprise messaging platform via WebSocket gateway"
+description: "Connect Hermes Agent to the Yuanbao enterprise messaging platform via WebSocket gateway"
 ---
 
 # Yuanbao
 
-Connect Hermes to [Yuanbao](https://yuanbao.tencent.com/), Tencent's enterprise messaging platform. The adapter uses a WebSocket gateway for real-time message delivery and supports both direct (C2C) and group conversations.
-
-:::info
-Yuanbao is an enterprise messaging platform primarily used within Tencent and enterprise environments. It uses WebSocket for real-time communication, HMAC-based authentication, and supports rich media including images, files, and voice messages.
+:::warning Hermes Labs plugin
+Yuanbao is now a Hermes Labs plugin: built by Nous Research, not supported, and likely not maintained going forward. Fixes from the community are welcome.
 :::
 
-## Prerequisites
+The [Yuanbao](https://yuanbao.tencent.com/) gateway platform and its `yb_*` tools (`yb_query_group_info`, `yb_query_group_members`, `yb_send_dm`, `yb_search_sticker`, `yb_send_sticker`) are no longer part of Hermes core. They ship as the `yuanbao` plugin in [NousResearch/hermes-labs-plugins](https://github.com/NousResearch/hermes-labs-plugins/tree/main/yuanbao), which carries the full setup guide.
 
-- A Yuanbao account with bot creation permissions
-- Yuanbao APP_ID and APP_SECRET (from platform admin)
-- Python packages: `websockets` and `httpx`, both core Hermes dependencies
-
-If these core dependencies are damaged, repair the selected environment:
+## Install
 
 ```bash
-hermes pm repair
+hermes plugins install yuanbao
 ```
 
 ## Setup

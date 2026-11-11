@@ -1,12 +1,12 @@
 ---
 sidebar_position: 8
 title: "Mattermost"
-description: "将 CNCNS Agent 配置为 Mattermost 机器人"
+description: "将 Hermes Agent 配置为 Mattermost 机器人"
 ---
 
 # Mattermost 配置
 
-CNCNS Agent 以机器人身份集成到 Mattermost，让你可以通过私信或团队频道与 AI 助手对话。Mattermost 是一个自托管的开源 Slack 替代品——运行在你自己的基础设施上，完全掌控数据。机器人通过 Mattermost 的 REST API（v4）和 WebSocket 连接以接收实时事件，将消息通过 CNCNS Agent 管道（包括工具调用、记忆和推理）处理后实时响应。支持文本、文件附件、图片和斜杠命令。
+Hermes Agent 以机器人身份集成到 Mattermost，让你可以通过私信或团队频道与 AI 助手对话。Mattermost 是一个自托管的开源 Slack 替代品——运行在你自己的基础设施上，完全掌控数据。机器人通过 Mattermost 的 REST API（v4）和 WebSocket 连接以接收实时事件，将消息通过 Hermes Agent 管道（包括工具调用、记忆和推理）处理后实时响应。支持文本、文件附件、图片和斜杠命令。
 
 无需额外的 Mattermost 库——适配器使用 `aiohttp`，该库已作为 Hermes 的依赖项包含在内。
 
@@ -72,7 +72,7 @@ group_sessions_per_user: false
 2. 点击**添加机器人账户**。
 3. 填写详细信息：
    - **用户名**：例如 `hermes`
-   - **显示名称**：例如 `CNCNS Agent`
+   - **显示名称**：例如 `Hermes Agent`
    - **描述**：可选
    - **角色**：`Member` 即可
 4. 点击**创建机器人账户**。
@@ -100,10 +100,21 @@ group_sessions_per_user: false
 
 ## 第四步：查找你的 Mattermost 用户 ID
 
-CNCNS Agent 使用你的 Mattermost 用户 ID 来控制谁可以与机器人交互。查找方式：
+Hermes Agent 使用你的 Mattermost 用户 ID 来控制谁可以与机器人交互。个人资料对话框（头像 → 个人资料）里没有这个 ID。
 
-1. 点击左上角的**头像** → **个人资料**。
-2. 用户 ID 显示在个人资料对话框中——点击即可复制。
+可以用以下任一方式查找（见 Mattermost 文档 [Identify a user's ID](https://docs.mattermost.com/administration-guide/configure/user-management-configuration-settings#identify-a-users-id)）：
+
+1. **System Console**（系统管理员）：**User Management** → **Users** → 打开你自己的用户。ID 在 User Configuration 页面上。
+2. **浏览器**（任何用户）：在已登录 Mattermost 的浏览器中新开标签页，打开 `https://your-mattermost-server/api/v4/users/me`。返回里的 `id` 就是你的用户 ID。
+3. **用 bot token 调用 API**：按你的用户名查询。返回里的 `id` 是你的：
+
+   ```bash
+   curl -s -H "Authorization: Bearer YOUR_BOT_TOKEN" \
+     https://your-mattermost-server/api/v4/users/username/YOUR_USERNAME
+   ```
+
+   不要用 bot token 调用 `/api/v4/users/me`：那返回的是 **bot** 的 ID，不是你的。
+4. **mmctl**（系统管理员）：`mmctl user list --all` 会为每个用户输出一行 `<id>: <username> (<email>)`。
 
 你的用户 ID 是一个 26 位字母数字字符串，例如 `3uo8dkh1p7g1mfk49ear5fzs5c`。
 
@@ -111,18 +122,11 @@ CNCNS Agent 使用你的 Mattermost 用户 ID 来控制谁可以与机器人交�
 你的用户 ID **不是**你的用户名。用户名是 `@` 后面显示的内容（例如 `@alice`）。用户 ID 是 Mattermost 内部使用的长字母数字标识符。
 :::
 
-**替代方法**：你也可以通过 API 获取用户 ID：
-
-```bash
-curl -H "Authorization: Bearer YOUR_TOKEN" \
-  https://your-mattermost-server/api/v4/users/me | jq .id
-```
-
 :::tip
 要获取**频道 ID**：点击频道名称 → **查看信息**。频道 ID 显示在信息面板中。如果你想手动设置主频道，需要用到它。
 :::
 
-## 第五步：配置 CNCNS Agent
+## 第五步：配置 Hermes Agent
 
 ### 方式 A：交互式配置（推荐）
 
@@ -331,10 +335,10 @@ mattermost:
 务必设置 `MATTERMOST_ALLOWED_USERS` 以限制谁可以与机器人交互。若未设置，gateway 默认拒绝所有用户作为安全措施。仅添加你信任的人的用户 ID——授权用户对 agent 的所有功能拥有完整访问权限，包括工具调用和系统访问。
 :::
 
-有关保护 CNCNS Agent 部署的更多信息，请参阅[安全指南](../security.md)。
+有关保护 Hermes Agent 部署的更多信息，请参阅[安全指南](../security.md)。
 
 ## 说明
 
 - **自托管友好**：适用于任何自托管的 Mattermost 实例。无需 Mattermost Cloud 账户或订阅。
-- **无额外依赖**：适配器使用 `aiohttp` 处理 HTTP 和 WebSocket，该库已包含在 CNCNS Agent 中。
+- **无额外依赖**：适配器使用 `aiohttp` 处理 HTTP 和 WebSocket，该库已包含在 Hermes Agent 中。
 - **兼容团队版**：同时支持 Mattermost 团队版（免费）和企业版。

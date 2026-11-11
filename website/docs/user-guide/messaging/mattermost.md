@@ -1,12 +1,12 @@
 ---
 sidebar_position: 8
 title: "Mattermost"
-description: "Set up CNCNS Agent as a Mattermost bot"
+description: "Set up Hermes Agent as a Mattermost bot"
 ---
 
 # Mattermost Setup
 
-CNCNS Agent integrates with Mattermost as a bot, letting you chat with your AI assistant through direct messages or team channels. Mattermost is a self-hosted, open-source Slack alternative — you run it on your own infrastructure, keeping full control of your data. The bot connects via Mattermost's REST API (v4) and WebSocket for real-time events, processes messages through the CNCNS Agent pipeline (including tool use, memory, and reasoning), and responds in real time. It supports text, file attachments, images, and slash commands.
+Hermes Agent integrates with Mattermost as a bot, letting you chat with your AI assistant through direct messages or team channels. Mattermost is a self-hosted, open-source Slack alternative — you run it on your own infrastructure, keeping full control of your data. The bot connects via Mattermost's REST API (v4) and WebSocket for real-time events, processes messages through the Hermes Agent pipeline (including tool use, memory, and reasoning), and responds in real time. It supports text, file attachments, images, and slash commands.
 
 No external Mattermost library is required — the adapter uses `aiohttp`, which is already a Hermes dependency.
 
@@ -72,7 +72,7 @@ If you don't have System Admin access, ask your Mattermost administrator to enab
 2. Click **Add Bot Account**.
 3. Fill in the details:
    - **Username**: e.g., `hermes`
-   - **Display Name**: e.g., `CNCNS Agent`
+   - **Display Name**: e.g., `Hermes Agent`
    - **Description**: optional
    - **Role**: `Member` is sufficient
 4. Click **Create Bot Account**.
@@ -100,10 +100,21 @@ For DMs, simply open a direct message with the bot — it will be able to respon
 
 ## Step 4: Find Your Mattermost User ID
 
-CNCNS Agent uses your Mattermost User ID to control who can interact with the bot. To find it:
+Hermes Agent uses your Mattermost User ID to control who can interact with the bot. The profile dialog (avatar → Profile) does not show it.
 
-1. Click your **avatar** (top-left corner) → **Profile**.
-2. Your User ID is displayed in the profile dialog — click it to copy.
+Use one of these (see Mattermost's [Identify a user's ID](https://docs.mattermost.com/administration-guide/configure/user-management-configuration-settings#identify-a-users-id)):
+
+1. **System Console** (system admins): **User Management** → **Users** → open your user. The ID is on the User Configuration page.
+2. **Browser** (any user): while logged in to Mattermost, open `https://your-mattermost-server/api/v4/users/me` in a new tab. The `id` field is your User ID.
+3. **API with the bot token**: look up your username. The `id` field in the response is yours:
+
+   ```bash
+   curl -s -H "Authorization: Bearer YOUR_BOT_TOKEN" \
+     https://your-mattermost-server/api/v4/users/username/YOUR_USERNAME
+   ```
+
+   Don't call `/api/v4/users/me` with the bot token: that returns the **bot's** ID, not yours.
+4. **mmctl** (system admins): `mmctl user list --all` prints one line per user: `<id>: <username> (<email>)`.
 
 Your User ID is a 26-character alphanumeric string like `3uo8dkh1p7g1mfk49ear5fzs5c`.
 
@@ -111,18 +122,11 @@ Your User ID is a 26-character alphanumeric string like `3uo8dkh1p7g1mfk49ear5fz
 Your User ID is **not** your username. The username is what appears after `@` (e.g., `@alice`). The User ID is a long alphanumeric identifier that Mattermost uses internally.
 :::
 
-**Alternative**: You can also get your User ID via the API:
-
-```bash
-curl -H "Authorization: Bearer YOUR_TOKEN" \
-  https://your-mattermost-server/api/v4/users/me | jq .id
-```
-
 :::tip
 To get a **Channel ID**: click the channel name → **View Info**. The Channel ID is shown in the info panel. You'll need this if you want to set a home channel manually.
 :::
 
-## Step 5: Configure CNCNS Agent
+## Step 5: Configure Hermes Agent
 
 ### Option A: Interactive Setup (Recommended)
 
@@ -155,6 +159,12 @@ MATTERMOST_ALLOWED_USERS=3uo8dkh1p7g1mfk49ear5fzs5c
 
 # Optional: channels where bot responds without @mention (comma-separated channel IDs)
 # MATTERMOST_FREE_RESPONSE_CHANNELS=channel_id_1,channel_id_2
+
+# Optional: peer bot user IDs. Posts from Mattermost bot accounts (props.from_bot) are
+# recognised on their own; list personal-access-token bots here. These senders use the bot
+# loop guard; set MATTERMOST_ALLOW_BOTS=all (or mentions) only when bot-to-bot messages are
+# intentional. The config.yaml spelling is `mattermost: bot_users: [...]`.
+# MATTERMOST_BOT_USERS=peer_bot_user_id_1,peer_bot_user_id_2
 ```
 
 Optional behavior settings in `~/.hermes/config.yaml`:
@@ -331,10 +341,10 @@ Keys are Mattermost channel IDs (find them in the channel URL or via the API). A
 Always set `MATTERMOST_ALLOWED_USERS` to restrict who can interact with the bot. Without it, the gateway denies all users by default as a safety measure. Only add User IDs of people you trust — authorized users have full access to the agent's capabilities, including tool use and system access.
 :::
 
-For more information on securing your CNCNS Agent deployment, see the [Security Guide](../security.md).
+For more information on securing your Hermes Agent deployment, see the [Security Guide](../security.md).
 
 ## Notes
 
 - **Self-hosted friendly**: Works with any self-hosted Mattermost instance. No Mattermost Cloud account or subscription required.
-- **No extra dependencies**: The adapter uses `aiohttp` for HTTP and WebSocket, which is already included with CNCNS Agent.
+- **No extra dependencies**: The adapter uses `aiohttp` for HTTP and WebSocket, which is already included with Hermes Agent.
 - **Team Edition compatible**: Works with both Mattermost Team Edition (free) and Enterprise Edition.
