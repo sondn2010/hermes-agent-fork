@@ -17,6 +17,47 @@ export type Locale =
   | "hu"
   | "ar";
 
+/** BKT Modules page strings; optional in `Translations`, English fallback at the call site. */
+export interface BktModulesPageStrings {
+  title: string;
+  headline: string;
+  bannerSessions: string;
+  bannerCommon: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  categoryFilterLabel: string;
+  statusFilterLabel: string;
+  statusAll: string;
+  statusEnabled: string;
+  statusDisabled: string;
+  clearFilters: string;
+  enabled: string;
+  disabled: string;
+  updating: string;
+  categoryCount: (enabled: number, total: number) => string;
+  toggleModuleLabel: (name: string) => string;
+  toggleCategoryLabel: (category: string) => string;
+  diaCommonWarning: string;
+  diaCommonWarningHint: string;
+  emptyTitle: string;
+  emptyHint: string;
+  noMatches: string;
+  loadFailed: string;
+  toggleFailed: (name: string, error: string) => string;
+  categoryUpdated: (count: number, enabled: boolean) => string;
+  categoryPartialFailure: (failed: number, total: number, names: string) => string;
+  categories: {
+    shared: string;
+    "knowledge-rag": string;
+    "assistant-channels": string;
+    "domain-lookup": string;
+    "analysis-forecast": string;
+    "decision-support": string;
+    "monitoring-personalization": string;
+    uncategorized: string;
+  };
+}
+
 export interface Translations {
   // ── Common ──
   common: {
@@ -427,6 +468,9 @@ export interface Translations {
     catalogRequiresEnv?: string;
     removedFromCatalog?: string;
   };
+
+  // ── BKT Modules page (optional: locales without it fall back to English) ──
+  bktModulesPage?: BktModulesPageStrings;
 
   // ── Profiles page ──
   profiles: {

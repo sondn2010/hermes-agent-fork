@@ -24,6 +24,7 @@ import {
   Activity,
   BarChart3,
   BookOpen,
+  Boxes,
   Clock,
   Code,
   Cpu,
@@ -92,6 +93,7 @@ const ProfilesPage = lazy(() => import("@/pages/ProfilesPage"));
 const ProfileBuilderPage = lazy(() => import("@/pages/ProfileBuilderPage"));
 const SkillsPage = lazy(() => import("@/pages/SkillsPage"));
 const PluginsPage = lazy(() => import("@/pages/PluginsPage"));
+const BktModulesPage = lazy(() => import("@/pages/BktModulesPage"));
 const McpPage = lazy(() => import("@/pages/McpPage"));
 const PairingPage = lazy(() => import("@/pages/PairingPage"));
 const ChannelsPage = lazy(() => import("@/pages/ChannelsPage"));
@@ -166,6 +168,7 @@ const BUILTIN_ROUTES_CORE: Record<string, ComponentType> = {
   "/cron": CronPage,
   "/skills": SkillsPage,
   "/plugins": PluginsPage,
+  "/bkt-modules": BktModulesPage,
   "/mcp": McpPage,
   "/pairing": PairingPage,
   "/channels": ChannelsPage,
@@ -210,6 +213,7 @@ const BUILTIN_NAV_REST: NavItem[] = [
   { path: "/cron", labelKey: "cron", label: "Cron", icon: Clock },
   { path: "/skills", labelKey: "skills", label: "Skills", icon: Package },
   { path: "/plugins", labelKey: "plugins", label: "Plugins", icon: Puzzle },
+  { path: "/bkt-modules", label: "BKT Modules", icon: Boxes },
   { path: "/mcp", label: "MCP", icon: Plug },
   { path: "/channels", label: "Channels", icon: Radio },
   { path: "/webhooks", label: "Webhooks", icon: Webhook },

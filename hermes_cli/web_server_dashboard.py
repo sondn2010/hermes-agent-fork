@@ -727,6 +727,13 @@ def _plugin_runtime_status(aliases: set, enabled_set: set, disabled_set: set) ->
     return "disabled" if aliases & disabled_set else "enabled" if aliases & enabled_set else "inactive"
 
 
+def _plugin_manifest_tags(manifest: dict[str, Any], name: str) -> list[str]:
+    """Manifest ``tags`` with the plugin loader's type rule (a non-list warns and yields ``[]``)."""
+    from hermes_cli.plugins_manifest import _manifest_field_of_type
+
+    return [str(t) for t in (_manifest_field_of_type(manifest, name, "tags", list, "a list") or [])]
+
+
 def _merged_plugins_hub(force_refresh: bool = False) -> dict[str, Any]:
     """Agent discovery + dashboard manifests + provider picker metadata.
 
@@ -794,7 +801,8 @@ def _merged_plugins_hub(force_refresh: bool = False) -> dict[str, Any]:
             under_user_tree = False
         can_remove_update = source in {"user", "git"} and under_user_tree and dir_path.is_dir()
 
-        provides_tools = _read_plugin_manifest_at(dir_path).get("provides_tools") or []
+        manifest = _read_plugin_manifest_at(dir_path)
+        provides_tools = manifest.get("provides_tools") or []
         auth_required, auth_command = _plugin_auth_hint(name, provides_tools) if provides_tools else (False, "")
 
         rows.append({
@@ -812,6 +820,7 @@ def _merged_plugins_hub(force_refresh: bool = False) -> dict[str, Any]:
             "auth_command": auth_command,
             "user_hidden": name in hidden_plugins,
             "removed_reason": removed_annotation(name, dir_str, removed_entries),
+            "tags": _plugin_manifest_tags(manifest, name),
         })
 
     agent_names = {r["name"] for r in rows}

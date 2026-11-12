@@ -2610,12 +2610,7 @@ export interface PluginManifestResponse {
   description: string;
   icon: string;
   version: string;
-  tab: {
-    path: string;
-    position?: string;
-    override?: string;
-    hidden?: boolean;
-  };
+  tab: { path: string; position?: string; override?: string; hidden?: boolean };
   slots?: string[];
   entry: string;
   css?: string | null;
@@ -2639,6 +2634,8 @@ export interface HubAgentPluginRow {
   user_hidden: boolean;
   /** Reason string when this plugin is on the catalog removed blocklist. */
   removed_reason?: string | null;
+  /** Manifest `tags` (generic; `[]` when the manifest declares none). */
+  tags: string[];
 }
 
 export interface PluginsHubProviders {

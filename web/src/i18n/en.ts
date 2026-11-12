@@ -1,4 +1,45 @@
-import type { Translations } from "./types";
+import type { BktModulesPageStrings, Translations } from "./types";
+
+/** Exported on its own so the BKT Modules page can fall back to it for locales without the block. */
+export const enBktModulesPage: BktModulesPageStrings = {
+  title: "BKT Modules",
+  headline: "Show or hide BKT modules for the agent. Modules are grouped by category.",
+  bannerSessions: "Changes apply to new sessions; running sessions keep their current tools.",
+  bannerCommon: "Keep bkt-dia-common enabled: every DIA module depends on it.",
+  searchLabel: "Search modules",
+  searchPlaceholder: "Search by name or description",
+  categoryFilterLabel: "Categories",
+  statusFilterLabel: "Status",
+  statusAll: "All",
+  statusEnabled: "Enabled",
+  statusDisabled: "Disabled",
+  clearFilters: "Clear filters",
+  enabled: "Enabled",
+  disabled: "Disabled",
+  updating: "Updating…",
+  categoryCount: (enabled, total) => `${enabled}/${total} enabled`,
+  toggleModuleLabel: (name) => `Enable ${name}`,
+  toggleCategoryLabel: (category) => `Enable all visible modules in ${category}`,
+  diaCommonWarning: "Needs bkt-dia-common",
+  diaCommonWarningHint: "This DIA module does nothing until bkt-dia-common is enabled.",
+  emptyTitle: "No BKT modules installed",
+  emptyHint: "Plugins whose name starts with bkt- appear here once installed.",
+  noMatches: "No modules match the current filters.",
+  loadFailed: "Could not load modules.",
+  toggleFailed: (name, error) => `Could not update ${name}: ${error}`,
+  categoryUpdated: (count, enabled) => `${count} module${count === 1 ? "" : "s"} ${enabled ? "enabled" : "disabled"}`,
+  categoryPartialFailure: (failed, total, names) => `${failed} of ${total} modules failed to update: ${names}`,
+  categories: {
+    shared: "Shared foundation",
+    "knowledge-rag": "Knowledge & RAG",
+    "assistant-channels": "Assistants & channels",
+    "domain-lookup": "Domain lookup",
+    "analysis-forecast": "Analysis & forecast",
+    "decision-support": "Decision support",
+    "monitoring-personalization": "Monitoring & personalization",
+    uncategorized: "Uncategorized",
+  },
+};
 
 export const en: Translations = {
   common: {
@@ -352,6 +393,8 @@ export const en: Translations = {
         "No messaging platforms configured. Set one up under Channels to deliver reports.",
     },
   },
+
+  bktModulesPage: enBktModulesPage,
 
   profiles: {
     newProfile: "New Profile",
