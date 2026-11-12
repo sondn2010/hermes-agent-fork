@@ -1,0 +1,15 @@
+name: bkt-dia-risk-monitor
+version: 0.1.0
+manifest_version: 2
+description: "F026 multi-domain risk monitoring (DIA AI): on-demand risk evidence for finance, legal, trade, workforce and cross-domain checks, plus data freshness. Read-only; schedule checks with Hermes cron. Needs bkt-dia-common enabled. — Giám sát rủi ro đa chiều và cảnh báo dữ liệu nghiệp vụ."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:monitoring-personalization
+  - f026
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_risk_monitor_check
+  - bkt_dia_risk_monitor_freshness

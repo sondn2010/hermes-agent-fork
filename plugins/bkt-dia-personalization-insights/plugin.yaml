@@ -1,0 +1,14 @@
+name: bkt-dia-personalization-insights
+version: 0.1.0
+manifest_version: 2
+description: "F027 personalized and proactive suggestions (DIA AI): latest data on the topics a user chose to follow, grounding 'what to ask next' suggestions; preferences live in user-controlled Hermes memory. Read-only, no behaviour tracking. Needs bkt-dia-common enabled. — Phân tích hành vi và cá nhân hóa trải nghiệm AI."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:monitoring-personalization
+  - f027
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_personalization_insights_suggest
