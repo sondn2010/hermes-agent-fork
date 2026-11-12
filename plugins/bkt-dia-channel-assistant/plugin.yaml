@@ -1,0 +1,14 @@
+name: bkt-dia-channel-assistant
+version: 0.1.0
+manifest_version: 2
+description: "F011 channel assistant (DIA AI): short, voice-friendly answers from DIA data for voice, chat-app and embedded-web channels. Channels themselves are Hermes gateway platforms. Read-only. Needs bkt-dia-common enabled. / Trợ lý kênh: trả lời ngắn gọn cho giọng nói, Zalo OA, website nhúng."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:assistant-channels
+  - f011
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_channel_assistant_lookup

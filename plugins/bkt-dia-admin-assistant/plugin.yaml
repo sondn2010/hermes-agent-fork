@@ -1,0 +1,15 @@
+name: bkt-dia-admin-assistant
+version: 0.1.0
+manifest_version: 2
+description: "F010 admin Q&A assistant (DIA AI): enterprise and digital-product questions, legal documents and report summaries with cited sources. Read-only. Needs bkt-dia-common enabled. / Trợ lý hỏi đáp quản trị: doanh nghiệp, sản phẩm, văn bản pháp quy, tóm tắt văn bản."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:assistant-channels
+  - f010
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_admin_assistant_ask
+  - bkt_dia_admin_assistant_documents

@@ -1,0 +1,14 @@
+name: bkt-dia-conversation-assistant
+version: 0.1.0
+manifest_version: 2
+description: "F012 conversation assistant (DIA AI): context-aware domain questions plus a skill for clarifying, goal-led sessions, summaries, follow-up suggestions and read-aloud. Read-only. Needs bkt-dia-common enabled. / Trợ lý hội thoại theo ngữ cảnh cho người dùng."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:assistant-channels
+  - f012
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_conversation_assistant_ask
