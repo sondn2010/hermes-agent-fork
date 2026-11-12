@@ -1,0 +1,15 @@
+name: bkt-dia-finance-forecast
+version: 0.1.0
+manifest_version: 2
+description: "F021 enterprise finance analysis (DIA AI): multi-year enterprise revenue and tax history plus digital-industry finance benchmarks, as input for a labelled LLM-side trend analysis (not a statistical forecast). Read-only. Needs bkt-dia-common enabled. / Phân tích và dự báo tài chính doanh nghiệp."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:analysis-forecast
+  - f021
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_finance_forecast_history
+  - bkt_dia_finance_forecast_benchmark

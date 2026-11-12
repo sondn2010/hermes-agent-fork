@@ -1,0 +1,15 @@
+name: bkt-dia-sector-forecast
+version: 0.1.0
+manifest_version: 2
+description: "F022 digital-industry analysis (DIA AI): multi-year workforce, export/import, GDP contribution and bid-package statistics, as input for a labelled LLM-side trend analysis (not a statistical forecast). Read-only. Needs bkt-dia-common enabled. / Phân tích và dự báo nhân lực, thương mại, GDP và gói thầu."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:analysis-forecast
+  - f022
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_sector_forecast_series
+  - bkt_dia_sector_forecast_tenders
