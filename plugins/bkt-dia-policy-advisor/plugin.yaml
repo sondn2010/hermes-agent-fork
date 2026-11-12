@@ -1,0 +1,15 @@
+name: bkt-dia-policy-advisor
+version: 0.1.0
+manifest_version: 2
+description: "F023 policy advisor (DIA AI): retrieves legal and policy documents on tax, investment incentives, R&D and market support, plus sector statistics as evidence; recommendations are advisory and cited. Read-only. Needs bkt-dia-common enabled. (Trợ lý khuyến nghị chính sách thuế, ưu đãi đầu tư và R&D)"
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:decision-support
+  - f023
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_policy_advisor_documents
+  - bkt_dia_policy_advisor_statistics

@@ -1,0 +1,15 @@
+name: bkt-dia-partner-matchmaking
+version: 0.1.0
+manifest_version: 2
+description: "F025 partner matchmaking (DIA AI): retrieves bid package requirements and candidate enterprises by capability, sector and region; ranking is skill-guided LLM analysis with shown criteria, not a matching service. Read-only. Needs bkt-dia-common enabled. (AI kết nối và khuyến nghị đối tác chiến lược)"
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:decision-support
+  - f025
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_partner_matchmaking_tender
+  - bkt_dia_partner_matchmaking_candidates

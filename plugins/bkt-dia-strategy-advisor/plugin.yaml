@@ -1,0 +1,15 @@
+name: bkt-dia-strategy-advisor
+version: 0.1.0
+manifest_version: 2
+description: "F024 strategy advisor (DIA AI): enterprise capability profile and sector, market, product, workforce and training evidence for strategy, investment, cooperation and risk reports. Read-only. Needs bkt-dia-common enabled. (Trợ lý chiến lược doanh nghiệp, đầu tư và phát triển sản phẩm)"
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:decision-support
+  - f024
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_strategy_advisor_enterprise
+  - bkt_dia_strategy_advisor_market
