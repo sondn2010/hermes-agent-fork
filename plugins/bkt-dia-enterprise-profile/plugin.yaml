@@ -1,0 +1,15 @@
+name: bkt-dia-enterprise-profile
+version: 0.1.0
+manifest_version: 2
+description: "F015 enterprise profile lookup (DIA AI): current profile by name or tax code, profile history over the years, similar enterprises. Read-only. Needs bkt-dia-common enabled."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:domain-lookup
+  - f015
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_enterprise_profile_lookup
+  - bkt_dia_enterprise_profile_history

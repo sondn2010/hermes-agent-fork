@@ -1,0 +1,22 @@
+name: bkt-dia-common
+version: 1.0.0
+manifest_version: 2
+description: "Shared DIA AI query client, settings and tool factory. Every bkt-dia-* module needs it enabled: its tools refuse to query while bkt-dia-common is disabled. Registers no model tools."
+author: BKTech
+tags:
+  - bkt
+  - category:shared
+provides_tools: []
+config_schema:
+  endpoint:
+    type: str
+    required: true
+    description: "Base URL of the DIA ES query service (e.g. http://dia-query.internal:8000). /api/v1/query is appended unless already present. Private addresses need security.allow_private_urls: true; cloud metadata is always refused."
+  timeout_seconds:
+    type: float
+    default: 15
+    description: "Per-request timeout in seconds (max 60) so a slow service never freezes the agent turn."
+  max_sources:
+    type: int
+    default: 20
+    description: "Maximum number of source records returned to the model per call (max 100)."
