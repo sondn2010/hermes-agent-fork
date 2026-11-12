@@ -1,0 +1,15 @@
+name: bkt-dia-finance-tax
+version: 0.1.0
+manifest_version: 2
+description: "F016 finance, tax, state-budget and GDP-contribution lookup (DIA AI) - Tra cứu tài chính, thuế, nghĩa vụ ngân sách và đóng góp GDP. Enterprise revenue and tax by year, sector revenue/profit/budget/GDP statistics. Read-only. Needs bkt-dia-common enabled."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:domain-lookup
+  - f016
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_finance_tax_enterprise_lookup
+  - bkt_dia_finance_tax_sector_stats

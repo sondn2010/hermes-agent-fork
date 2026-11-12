@@ -1,0 +1,14 @@
+name: bkt-dia-import-export
+version: 0.1.0
+manifest_version: 2
+description: "F017 digital-tech import/export lookup (DIA AI) - Tra cứu và phân tích dữ liệu xuất nhập khẩu. Trade value by product, market, enterprise and period as far as the data service indexes it. Read-only. Needs bkt-dia-common enabled."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:domain-lookup
+  - f017
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_import_export_lookup

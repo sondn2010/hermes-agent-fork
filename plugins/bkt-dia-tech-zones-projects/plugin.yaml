@@ -1,0 +1,15 @@
+name: bkt-dia-tech-zones-projects
+version: 0.1.0
+manifest_version: 2
+description: "F020 digital-tech zones and tender lookup (DIA AI) - Tra cứu khu công nghệ số, dự án và gói thầu. Concentrated digital-tech zones and digital-tech procurement packages (status, value, location). Read-only. Needs bkt-dia-common enabled."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:domain-lookup
+  - f020
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_tech_zones_projects_zone_lookup
+  - bkt_dia_tech_zones_projects_tender_lookup

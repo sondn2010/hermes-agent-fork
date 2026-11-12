@@ -1,0 +1,14 @@
+name: bkt-dia-workforce
+version: 0.1.0
+manifest_version: 2
+description: "F019 digital-tech workforce statistics (DIA AI) - Tra cứu và phân tích nhân lực ngành công nghiệp công nghệ số. Workforce size by province, qualification, gender, age group or field, aggregate data only. Read-only. Needs bkt-dia-common enabled."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:domain-lookup
+  - f019
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_workforce_stats

@@ -1,0 +1,15 @@
+name: bkt-dia-digital-products
+version: 0.1.0
+manifest_version: 2
+description: "F018 digital-tech product and service lookup (DIA AI) - Tra cứu sản phẩm, dịch vụ công nghệ số và thị trường. Product search by keyword or provider and product statistics by group or provider. Read-only. Needs bkt-dia-common enabled."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:domain-lookup
+  - f018
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_digital_products_search
+  - bkt_dia_digital_products_stats
