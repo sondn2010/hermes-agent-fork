@@ -1,0 +1,15 @@
+name: bkt-dia-knowledge-governance
+version: 0.1.0
+manifest_version: 2
+description: "F005 knowledge governance reads (DIA AI): find records by a term and its synonyms, trace a record to its source, and spot records whose data period is old. No governance writes. Read-only. Needs bkt-dia-common enabled. / Tra cứu thuật ngữ, truy nguồn và phát hiện tri thức cũ."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:knowledge-rag
+  - f005
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_knowledge_governance_terms
+  - bkt_dia_knowledge_governance_audit

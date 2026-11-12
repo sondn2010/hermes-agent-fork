@@ -1,0 +1,14 @@
+name: bkt-dia-rag-retrieval
+version: 0.1.0
+manifest_version: 2
+description: "F006 knowledge Q&A (DIA AI): ask a natural-language question over the DIA knowledge base and get an answer with source records; follow-ups and drill-downs are rewritten by the agent. Read-only. Needs bkt-dia-common enabled. / Hỏi đáp tri thức theo ngôn ngữ tự nhiên, có dẫn nguồn."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:knowledge-rag
+  - f006
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_rag_retrieval_ask

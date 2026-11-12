@@ -1,0 +1,14 @@
+name: bkt-dia-document-intake
+version: 0.1.0
+manifest_version: 2
+description: "F002 ingested document lookup (DIA AI): find documents and records already in the knowledge base and show their extracted fields (number, title, summary, structured fields). No OCR or speech-to-text. Read-only. Needs bkt-dia-common enabled. / Tra cứu tài liệu đã tiếp nhận và các trường đã trích xuất."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:knowledge-rag
+  - f002
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_document_intake_lookup

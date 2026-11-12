@@ -1,0 +1,15 @@
+name: bkt-dia-knowledge-insights
+version: 0.1.0
+manifest_version: 2
+description: "F007 knowledge insights (DIA AI): fetch figures for one entity, sector, region or period at a time and statistics broken down by a dimension, so the agent can compare sides and describe trends (agent-side analysis, not a statistical model). Read-only. Needs bkt-dia-common enabled. / So sánh đa chiều và xu hướng tri thức."
+author: BKTech
+tags:
+  - bkt
+  - diaai
+  - category:knowledge-rag
+  - f007
+requires_plugins:
+  - id: bkt-dia-common
+provides_tools:
+  - bkt_dia_knowledge_insights_slice
+  - bkt_dia_knowledge_insights_breakdown
