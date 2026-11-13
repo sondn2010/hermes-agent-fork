@@ -31,6 +31,22 @@ Use any model you want — [Nous Portal](https://portal.nousresearch.com), OpenR
 </table>
 
 ---
+## Docker Build & Deployment
+
+To build and push the Docker image to Docker Hub, run:
+
+```cmd
+tools-devops\build_push.bat bkglobal-hermes-agent-v1.0 Dockerfile
+```
+
+On Linux/macOS:
+
+```bash
+./tools-devops/build_push.sh bkglobal-hermes-agent-v1.0 Dockerfile
+```
+
+---
+
 
 ## Quick Install
 

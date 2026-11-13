@@ -198,7 +198,7 @@ WORKDIR /opt/hermes
 # which fetched whatever revision the npm-resolved playwright wanted,
 # unverified, and recorded no fact. The resolved browser binary path is
 # baked to /etc/hermes/chromium-executable-path: the layout differs per
-# arch (chrome-linux64/chrome on amd64, chromium-linux-arm64/chromium on
+# arch (chrome-linux64/chrome on amd64, chrome-linux-arm64/chrome on
 # arm64), so it is resolved at build time and never hunted at boot.
 # hermes_cli/browser_runtime.py reads it when a volume over the runtime dir
 # hides pm's facts; stage2-hook.sh checks it still names a binary.
@@ -464,6 +464,7 @@ RUN set -eu; \
 # root /run/service scandir, and are reconciled on container restart by
 # /etc/cont-init.d/02-reconcile-profiles (Phase 4 Task 4.0).
 COPY docker/s6-rc.d/ /etc/s6-overlay/s6-rc.d/
+RUN find /etc/s6-overlay/s6-rc.d/ -type f -exec sed -i 's/\r$//' {} +
 
 # stage2-hook handles UID/GID remap, volume chown, config seeding,
 # skills sync — all the work the old entrypoint.sh did before
@@ -479,6 +480,11 @@ RUN mkdir -p /etc/cont-init.d && \
     chmod +x /etc/cont-init.d/01-hermes-setup
 COPY --chmod=0755 docker/cont-init.d/015-supervise-perms /etc/cont-init.d/015-supervise-perms
 COPY --chmod=0755 docker/cont-init.d/02-reconcile-profiles /etc/cont-init.d/02-reconcile-profiles
+
+# Normalize shell scripts copied from Windows environments.
+RUN sed -i 's/\r$//' \
+    /etc/cont-init.d/015-supervise-perms \
+    /etc/cont-init.d/02-reconcile-profiles
 
 # ---------- Runtime ----------
 ENV HERMES_WEB_DIST=/opt/hermes/hermes_cli/web_dist
