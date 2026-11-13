@@ -11,6 +11,8 @@ __pycache__
 .Python
 *.egg-info/
 dist/
+!plugins/**/dashboard/dist/
+!plugins/**/dashboard/dist/**
 build/
 !scripts/build/
 !scripts/build/**
@@ -64,6 +66,8 @@ htmlcov/
 *.md
 !skills/**/*.md
 !optional-skills/**/*.md
+!plugins/**/skills/**/*.md
+!plugins/**/*.md
 
 # Runtime data (bind-mounted at /opt/data; must not leak into build context)
 data/
