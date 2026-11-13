@@ -1,0 +1,10 @@
+.bkt-author-line { text-align: center; font-size: 0.75rem; color: var(--bkt-muted); padding: 0.75rem 0 0.25rem; opacity: 0.8; }
+.bkt-author-line a { color: inherit; text-decoration: underline dotted; }
+.bkt-author-line a:hover { color: var(--bkt-primary); }
+.bkt-about { max-width: 52rem; }
+.bkt-about-head img { border-radius: 8px; }
+.bkt-about-title { font-size: 1.4rem; font-weight: 600; margin: 0; }
+.bkt-about-subtitle { font-size: 1rem; font-weight: 600; margin: 0 0 0.25rem; }
+.bkt-about-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.bkt-about-table th, .bkt-about-table td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--bkt-border); vertical-align: top; }
+.bkt-about a { color: var(--bkt-primary); }

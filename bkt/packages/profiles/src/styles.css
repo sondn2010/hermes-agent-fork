@@ -1,0 +1,30 @@
+/* bkt-profiles workbench */
+.bkt-profiles-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bkt-profiles-main { gap: 0.75rem; }
+.bkt-profiles-title { font-size: 1.25rem; font-weight: 600; margin: 0; }
+.bkt-profiles-subtitle { font-size: 1rem; font-weight: 600; margin: 0; }
+.bkt-profiles-narrow { width: auto; min-width: 12rem; flex: 0 1 18rem; }
+.bkt-profiles-link { background: none; border: none; padding: 0; color: var(--bkt-primary); cursor: pointer; text-decoration: underline; font: inherit; }
+.bkt-profiles-link:disabled { opacity: 0.5; cursor: default; }
+.bkt-profiles-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.35rem 1rem; margin: 0; }
+.bkt-profiles-facts dt { color: var(--bkt-muted); }
+.bkt-profiles-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.bkt-profiles-editor { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.75rem; }
+@media (max-width: 1000px) { .bkt-profiles-editor { grid-template-columns: minmax(0, 1fr); } }
+.bkt-profiles-soul-input { min-height: 28rem; }
+.bkt-profiles-preview { max-height: 32rem; overflow-y: auto; }
+.bkt-profiles-diff { max-height: 24rem; overflow: auto; margin: 0; font-family: var(--theme-font-mono, ui-monospace, monospace); font-size: 0.8rem; background: var(--bkt-surface-0); border: 1px solid var(--bkt-border); border-radius: 6px; padding: 0.5rem; white-space: pre-wrap; }
+.bkt-profiles-diff-add { color: var(--bkt-tertiary); background: color-mix(in srgb, var(--bkt-tertiary) 10%, transparent); }
+.bkt-profiles-diff-del { color: var(--bkt-danger); background: color-mix(in srgb, var(--bkt-danger) 10%, transparent); }
+.bkt-profiles-diff-same { color: var(--bkt-muted); }
+.bkt-profiles-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.bkt-profiles-table th { text-align: left; color: var(--bkt-muted); font-weight: 500; }
+.bkt-profiles-table th, .bkt-profiles-table td { padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--bkt-border); }
+.bkt-profiles-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 0.75rem; }
+.bkt-profiles-card { justify-content: space-between; }
+.bkt-profiles-form { max-height: 60vh; overflow-y: auto; }
+.bkt-profiles-center { align-items: center; text-align: center; }
+.bkt-profiles-qr { border-radius: 6px; max-width: 100%; height: auto; }
+.bkt-profiles-url { overflow-wrap: anywhere; }
+.bkt-profiles-secret { display: block; color: var(--bkt-text); font-size: 0.95rem; user-select: all; overflow-wrap: anywhere; white-space: pre-wrap; }
+.bkt-picker-item.is-active { background: color-mix(in srgb, var(--bkt-accent) 20%, transparent); }

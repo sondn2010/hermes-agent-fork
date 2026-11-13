@@ -1,0 +1,14 @@
+{
+  "name": "bkt-prompts",
+  "label": "Prompts",
+  "description": "Reusable prompt library per profile, with {{variables}}, JSON import/export and send-to-chat.",
+  "icon": "Sparkles",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/bkt-prompts",
+    "position": "end"
+  },
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

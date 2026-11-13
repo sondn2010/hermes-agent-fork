@@ -1,0 +1,69 @@
+# BKT CLI/TUI + Desktop skin. Installed into <home>/skins/ by bkt/install.mjs; apply with `/skin bkt`.
+# Kept out of bkt/theme/*.yaml on purpose: that glob is the dashboard-theme set.
+#
+# Color values are consumed by Rich / prompt_toolkit (CLI), the Ink TUI and the Desktop converter
+# (apps/desktop/src/themes/skin.ts), so every key the CLI reads is a solid #RRGGBB: rgba() is not a
+# valid Rich colour. Desktop seeds:
+#   canvas  <- colors.background
+#   border  <- colors.ui_border (picked before banner_border). #3F51B559 is indigo at 35% alpha;
+#              skin.ts normalizeHex flattens it over the background, matching the dashboard's
+#              rgba(63, 81, 181, 0.35). Only Desktop reads ui_border.
+# customCSS: Desktop paints its tokens as inline styles on :root (root.style.setProperty), which
+# beat any normal stylesheet rule, so each override carries !important. Custom properties only.
+name: bkt
+description: BachKhoa Technology skin — cyan primary, indigo secondary, graphite surfaces.
+
+colors:
+  background: "#0E1012"
+  ui_border: "#3F51B559"
+  banner_border: "#3F51B5"
+  banner_title: "#00ADEF"
+  banner_accent: "#00ADEF"
+  banner_dim: "#94A3B8"
+  banner_text: "#F0F4F8"
+  ui_accent: "#00ADEF"
+  ui_label: "#3F51B5"
+  ui_ok: "#A2D149"
+  ui_error: "#ef5350"
+  ui_warn: "#ffa726"
+  prompt: "#00ADEF"
+  input_rule: "#3F51B5"
+  response_border: "#00ADEF"
+  status_bar_bg: "#212428"
+  status_bar_text: "#94A3B8"
+  status_bar_strong: "#00ADEF"
+  status_bar_dim: "#94A3B8"
+  status_bar_good: "#A2D149"
+  status_bar_warn: "#ffa726"
+  status_bar_bad: "#FF8C00"
+  status_bar_critical: "#FF6B6B"
+  session_label: "#3F51B5"
+  session_border: "#3F51B5"
+  completion_menu_bg: "#212428"
+  completion_menu_current_bg: "#282B30"
+  selection_bg: "#282B30"
+  shell_dollar: "#00ADEF"
+  voice_status_bg: "#212428"
+
+customCSS: |
+  :root {
+    --dt-background: #0E1012 !important;
+    --dt-foreground: #F0F4F8 !important;
+    --dt-card: #1A1C1E !important;
+    --dt-card-foreground: #F0F4F8 !important;
+    --dt-popover: #282B30 !important;
+    --dt-popover-foreground: #F0F4F8 !important;
+    --dt-muted: #212428 !important;
+    --dt-muted-foreground: #94A3B8 !important;
+    --dt-primary: #00ADEF !important;
+    --dt-secondary: #3F51B5 !important;
+    --dt-secondary-foreground: #F0F4F8 !important;
+    --dt-accent: #282B30 !important;
+    --dt-accent-foreground: #F0F4F8 !important;
+    --dt-ring: #00ADEF !important;
+    --dt-composer-ring: #00ADEF !important;
+    --dt-border: rgba(63, 81, 181, 0.35) !important;
+    --dt-input: rgba(63, 81, 181, 0.45) !important;
+    --dt-sidebar-bg: #212428 !important;
+    --dt-sidebar-border: rgba(63, 81, 181, 0.35) !important;
+  }

@@ -1,0 +1,14 @@
+{
+  "name": "bkt-health",
+  "label": "Health",
+  "description": "Live health of each profile's gateway, messaging platforms and API server, with a header status dot.",
+  "icon": "Zap",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/bkt-health",
+    "position": "end"
+  },
+  "slots": ["header-right"],
+  "entry": "dist/index.js",
+  "css": "dist/style.css"
+}

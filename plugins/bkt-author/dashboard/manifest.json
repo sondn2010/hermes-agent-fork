@@ -1,0 +1,14 @@
+{
+  "name": "bkt-author",
+  "label": "About BKT",
+  "description": "Author line under every page and an About page for the BachKhoa Technology plugins.",
+  "icon": "Heart",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/bkt-about",
+    "position": "end"
+  },
+  "slots": ["post-main"],
+  "entry": "dist/index.js",
+  "css": "dist/style.css"
+}

@@ -1,0 +1,9 @@
+.bkt-health-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.bkt-health-table th, .bkt-health-table td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--bkt-border); vertical-align: middle; }
+.bkt-health-row { cursor: pointer; }
+.bkt-health-row:hover { background: color-mix(in srgb, var(--bkt-accent) 7%, transparent); }
+.bkt-health-toggle { background: none; border: none; color: var(--bkt-muted); width: 1.25rem; cursor: pointer; }
+.bkt-health-platform { padding: 0.25rem 0; }
+.bkt-health-name { min-width: 8rem; }
+.bkt-health-dot { display: inline-flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; background: none; border: none; cursor: pointer; border-radius: 999px; }
+.bkt-health-dot:hover { background: color-mix(in srgb, var(--bkt-accent) 12%, transparent); }

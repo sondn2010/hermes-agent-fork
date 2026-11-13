@@ -1,0 +1,15 @@
+{
+  "name": "bkt-brand",
+  "label": "BKT Brand",
+  "description": "BachKhoa Technology logo in the header and favicon; hosts the shared mermaid vendor bundle.",
+  "icon": "Sparkles",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/bkt-brand",
+    "position": "end",
+    "hidden": true
+  },
+  "slots": ["header-left"],
+  "entry": "dist/index.js",
+  "css": "dist/style.css"
+}

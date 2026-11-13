@@ -1,0 +1,22 @@
+.bkt-flow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem); gap: 1rem; align-items: start; }
+@media (max-width: 900px) { .bkt-flow { grid-template-columns: minmax(0, 1fr); } }
+.bkt-flow-toolbar { gap: 0.75rem; }
+.bkt-flow-select { width: auto; min-width: 10rem; }
+.bkt-flow-title { font-size: 0.95rem; font-weight: 600; margin: 0; }
+.bkt-flow-legend { gap: 1rem; margin-top: 0.5rem; }
+.bkt-flow-key::before { content: ""; display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 999px; margin-right: 0.35rem; vertical-align: -0.1rem; border: 2px solid; }
+.bkt-flow-key-live::before { border-color: var(--bkt-primary); }
+.bkt-flow-key-recent::before { border-color: var(--bkt-tertiary); }
+.bkt-flow-node[aria-pressed="true"] { border-color: var(--bkt-accent); background: color-mix(in srgb, var(--bkt-accent) 14%, transparent); }
+.bkt-flow-ring { width: 0.7rem; height: 0.7rem; border-radius: 999px; flex: none; border: 2px solid #6b7280; }
+.bkt-flow-ring-live { border-color: var(--bkt-primary); background: color-mix(in srgb, var(--bkt-primary) 35%, transparent); animation: bkt-flow-pulse 1.6s ease-in-out infinite; }
+.bkt-flow-ring-recent { border-color: var(--bkt-tertiary); }
+.bkt-flow-link { color: var(--bkt-primary); font-size: 0.85rem; text-decoration: underline; }
+.bkt-flow-task { gap: 0.5rem; padding: 0.3rem 0.4rem; border-bottom: 1px solid var(--bkt-border); font-size: 0.9rem; }
+.bkt-flow-task:last-child { border-bottom: none; }
+/* Mermaid applies classDef names as classes on each node group. */
+.bkt-flow-graph g.node.bktLive > :is(rect, polygon, circle, path) { animation: bkt-flow-pulse 1.6s ease-in-out infinite; }
+@keyframes bkt-flow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--bkt-primary) 60%, transparent); }
+  50% { filter: drop-shadow(0 0 6px var(--bkt-primary)); box-shadow: 0 0 0 5px transparent; }
+}
