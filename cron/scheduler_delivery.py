@@ -16,6 +16,8 @@ import threading
 from dataclasses import dataclass
 from typing import Any, List, Optional
 
+from gateway.inbound_reply_context import record_cron_delivery, recording_cron_delivery
+
 
 # Log-record parity with the origin module.
 logger = logging.getLogger("cron.scheduler")
@@ -1230,23 +1232,24 @@ def _live_send_text(
     router = DeliveryRouter(t.config, t.target_adapters)
     route_target = DeliveryTarget(
         platform=t.platform, chat_id=str(t.chat_id), thread_id=route_thread_id, is_explicit=True)
-    # Thread routing goes via the target, not a bare metadata "thread_id": the router only applies
-    # its Telegram DM-topic detection when thread_id/message_thread_id are absent from metadata.
-    # Send through the already-authorized transport: re-resolving from the plain target_adapters
-    # dict cannot re-derive the SharedRouteAdapters satellite grant (the satellite owned
-    # platforms.<p> block is disabled), yields None, and drops the delivery (#115656).
+    # Thread routing goes via the target (the router's Telegram DM-topic detection needs thread keys
+    # absent from metadata). Send through the already-authorized transport: re-resolving from
+    # target_adapters loses the SharedRouteAdapters satellite grant and drops the send (#115656).
     # cancel() cannot tell "never started" from "in flight": a run_coroutine_threadsafe future stays
     # PENDING until the coroutine finishes, so cancel() returns True mid-send AND kills it. The send
     # records its own start under a lock; a timeout abandons it only if it never began.
     dispatch_lock = threading.Lock()
     dispatch = {"started": False, "abandoned": False}
+    import contextvars as _cv, functools as _ft  # chunk ids tagged at send end, in THIS profile
+    record_ids = _ft.partial(_cv.copy_context().run, record_cron_delivery, t.platform_name, t.chat_id, text_to_send)
 
     async def _send_once():
         with dispatch_lock:
             if dispatch["abandoned"]:
                 return None
             dispatch["started"] = True
-        return await router._deliver_to_platform(route_target, text_to_send, route_metadata, transport=t.transport)
+        return await recording_cron_delivery(router._deliver_to_platform(
+            route_target, text_to_send, route_metadata, transport=t.transport), record_ids)
 
     future = safe_schedule_threadsafe(_send_once(), t.loop)
     if future is None:
@@ -1456,8 +1459,6 @@ def _deliver_via_live_adapter(
                 unverified_targets=unverified_targets,
             )
 
-        # Media rides the same DM-topic-aware routing as text. Skipped after a confirmation
-        # timeout (loop contended, text already assumed delivered) — record the drop instead.
         # Send extracted media files as native attachments via the live adapter, using the same
         # DM-topic-aware routing as the text send (#22773 — media previously used a bare thread_id and
         # landed in the General lane for private DM topics). Skip on an in-flight confirmation timeout: the
@@ -1477,7 +1478,6 @@ def _deliver_via_live_adapter(
                 delivery_errors)
 
         if adapter_ok:
-            # Log WHERE it went: a ghost delivery in the wrong lane is otherwise indistinguishable.
             logger.info(
                 # Log WHERE it went, not just that it went: a ghost delivery that landed in the wrong lane
                 # (General topic instead of the routed thread) is indistinguishable from a real one without
@@ -1519,6 +1519,8 @@ def _deliver_standalone(
     if err is not None:
         target_errors.append(err)
         delivery_errors.extend(target_errors)
+        # A partial split send: replies to the chunks that landed are framed as a past report too.
+        record_cron_delivery(t.platform_name, t.chat_id, content.strip(), result or {})
         if t.standalone_in_flight:
             # The payload may be on screen (in full or in part); queueing it would let the
             # redelivery sweep post it twice. Possible loss over certain duplication: surface the
@@ -1539,6 +1541,7 @@ def _deliver_standalone(
         logger.error("Job '%s': %s", job["id"], msg)
         delivery_errors.append(msg)
     logger.info("Job '%s': delivered to %s:%s", job["id"], t.platform_name, t.chat_id)
+    record_cron_delivery(t.platform_name, t.chat_id, content.strip(), result)  # replies to ANY chunk framed
     # Thread seeding only happens on the live lane, so no thread_seeded gate applies here.
     _maybe_mirror_cron_delivery(
         job, t.platform_name, t.chat_id, t.mirror_text, thread_id=t.thread_id,
