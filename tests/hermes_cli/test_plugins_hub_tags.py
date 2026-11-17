@@ -74,3 +74,27 @@ def test_hub_cache_still_serves_the_memoized_payload(plugins_root):
     assert second is first
     row = next(r for r in second["plugins"] if r["name"] == "bkt-cached")
     assert row["tags"] == ["bkt", "category:shared"]
+
+
+def _write_dashboard_only_plugin(root: Path, name: str) -> None:
+    dashboard = root / name / "dashboard"
+    dashboard.mkdir(parents=True)
+    (dashboard / "manifest.json").write_text(f'{{"name": "{name}", "label": "{name}"}}', encoding="utf-8")
+
+
+def test_dashboard_only_plugins_report_user_hidden(plugins_root, monkeypatch):
+    """Dashboard-only tabs (no agent manifest) carry ``user_hidden`` like agent plugin rows do."""
+    from hermes_cli import web_server
+
+    _write_dashboard_only_plugin(plugins_root, "tab-hidden")
+    _write_dashboard_only_plugin(plugins_root, "tab-shown")
+    (plugins_root.parent / "config.yaml").write_text(
+        "dashboard:\n  hidden_plugins:\n    - tab-hidden\n", encoding="utf-8")
+    monkeypatch.setattr(web_server, "_dashboard_plugins_cache", None)
+
+    payload = _web_server_dashboard._merged_plugins_hub(force_refresh=True)
+
+    orphans = {p["name"]: p for p in payload["orphan_dashboard_plugins"]}
+    assert orphans["tab-hidden"]["user_hidden"] is True
+    assert orphans["tab-shown"]["user_hidden"] is False
+    assert all(isinstance(p["user_hidden"], bool) for p in orphans.values())

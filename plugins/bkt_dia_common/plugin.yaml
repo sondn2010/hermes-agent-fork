@@ -11,7 +11,7 @@ config_schema:
   endpoint:
     type: str
     required: true
-    description: "Base URL of the DIA ES query service (e.g. http://dia-query.internal:8000). /api/v1/query is appended unless already present. Private addresses need security.allow_private_urls: true; cloud metadata is always refused."
+    description: "Base URL of the DIA ES query service (e.g. http://dia-query.internal:8000). /api/v1/query is appended unless already present. A private or loopback host works without security.allow_private_urls; cloud metadata, userinfo credentials and ambiguous hosts are always refused, and redirects are never followed."
   timeout_seconds:
     type: float
     default: 15

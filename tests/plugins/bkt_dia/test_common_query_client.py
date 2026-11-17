@@ -1,8 +1,8 @@
 """Behaviour contract of the shared DIA query client (``plugins.bkt_dia_common.query_client``).
 
 Every call runs against a real local HTTP stub with a temp profile home; failures must come back
-as ``{"ok": False, "error", "hint"}`` without fabricated data and, where the request is refused
-locally, without any request reaching the service.
+as ``{"ok": False, "error", "hint", "stage"}`` without fabricated data and, where the request is
+refused locally, without any request reaching the service.
 """
 
 from __future__ import annotations
@@ -15,9 +15,12 @@ from plugins.bkt_dia_common.query_client import query
 from plugins.bkt_dia_common.settings import load_settings, query_url
 
 
-def _assert_failure(result: dict) -> None:
+def _assert_failure(result: dict, stage: str | None = None) -> None:
     assert result["ok"] is False
     assert result["error"] and result["hint"]
+    assert result["stage"] in {"validate", "disabled", "config", "url_safety", "network", "http", "response"}
+    if stage is not None:
+        assert result["stage"] == stage
     assert "answer" not in result and "sources" not in result
 
 
@@ -56,7 +59,7 @@ def test_unset_endpoint_fails_closed_without_request(dia_stub, write_profile):
 
     result = query("q")
 
-    _assert_failure(result)
+    _assert_failure(result, "config")
     assert result["error"] == "bkt-dia endpoint not configured"
     assert result["hint"] == "set plugins.entries.bkt-dia-common.settings.endpoint"
     assert dia_stub.requests == []
@@ -68,7 +71,7 @@ def test_disabled_common_plugin_refuses_without_request(dia_stub, write_profile)
     result = query("q")
 
     assert result == {"ok": False, "error": "bkt-dia-common plugin is disabled",
-                      "hint": "enable bkt-dia-common in config or dashboard"}
+                      "hint": "enable bkt-dia-common in config or dashboard", "stage": "disabled"}
     assert dia_stub.requests == []
 
 
@@ -86,7 +89,7 @@ def test_5xx_fails_closed(dia_stub, write_profile, status):
 
     result = query("q")
 
-    _assert_failure(result)
+    _assert_failure(result, "http")
     assert f"HTTP {status}" in result["error"]
 
 
@@ -97,7 +100,7 @@ def test_redirect_is_not_followed(dia_stub, write_profile):
 
     result = query("q")
 
-    _assert_failure(result)
+    _assert_failure(result, "http")
     assert "HTTP 302" in result["error"]
     assert len(dia_stub.requests) == 1
 
@@ -118,7 +121,7 @@ def test_timeout_fails_closed(dia_stub, write_profile):
 
     result = query("q")
 
-    _assert_failure(result)
+    _assert_failure(result, "network")
     assert "did not answer within 0.5s" in result["error"]
 
 
@@ -130,7 +133,7 @@ def test_connection_refused_fails_closed(write_profile):
 
     result = query("q")
 
-    _assert_failure(result)
+    _assert_failure(result, "network")
     assert result["error"] == "bkt-dia query service is unreachable"
 
 
@@ -140,7 +143,7 @@ def test_invalid_json_fails_closed(dia_stub, write_profile):
 
     result = query("q")
 
-    _assert_failure(result)
+    _assert_failure(result, "response")
     assert "invalid JSON" in result["error"]
 
 
@@ -148,7 +151,7 @@ def test_unexpected_shape_fails_closed(dia_stub, write_profile):
     write_profile(settings={"endpoint": dia_stub.base_url})
     dia_stub.payload = {"detail": "something else"}
 
-    _assert_failure(query("q"))
+    _assert_failure(query("q"), "response")
 
 
 def test_sources_truncated_to_max_sources(dia_stub, write_profile):
@@ -162,23 +165,40 @@ def test_sources_truncated_to_max_sources(dia_stub, write_profile):
     assert result["sources_omitted"] == 7
 
 
-@pytest.mark.parametrize("endpoint", ["http://169.254.169.254", "http://metadata.google.internal"])
-def test_cloud_metadata_refused_even_with_private_urls_allowed(write_profile, endpoint):
-    write_profile(settings={"endpoint": endpoint}, allow_private_urls=True)
+@pytest.mark.parametrize("allow_private_urls", [False, True])
+@pytest.mark.parametrize("endpoint", ["http://169.254.169.254", "http://metadata.google.internal/dia"])
+def test_cloud_metadata_refused_whatever_the_private_url_setting(write_profile, endpoint, allow_private_urls):
+    write_profile(settings={"endpoint": endpoint}, allow_private_urls=allow_private_urls)
 
     result = query("q")
 
-    _assert_failure(result)
+    _assert_failure(result, "url_safety")
     assert "URL safety" in result["error"]
 
 
-def test_private_address_refused_without_opt_in(dia_stub, write_profile):
+def test_loopback_endpoint_works_without_private_url_opt_in(dia_stub, write_profile):
+    """The DIA endpoint is operator configuration: a private or loopback service needs no global opt-in."""
     write_profile(settings={"endpoint": dia_stub.base_url}, allow_private_urls=False)
+
+    assert query("q")["ok"] is True
+    assert len(dia_stub.query_requests()) == 1
+
+
+def test_endpoint_with_userinfo_refused_without_request(dia_stub, write_profile):
+    endpoint = dia_stub.base_url.replace("http://", "http://user:s3cret@")
+    write_profile(settings={"endpoint": endpoint}, allow_private_urls=False)
 
     result = query("q")
 
-    _assert_failure(result)
-    assert "allow_private_urls" in result["hint"]
+    _assert_failure(result, "url_safety")
+    assert "s3cret" not in result["error"] + result["hint"]
+    assert dia_stub.requests == []
+
+
+def test_ambiguous_authority_refused_without_request(dia_stub, write_profile):
+    write_profile(settings={"endpoint": dia_stub.base_url + "\\evil.example"}, allow_private_urls=False)
+
+    _assert_failure(query("q"), "url_safety")
     assert dia_stub.requests == []
 
 
@@ -209,5 +229,5 @@ def test_settings_defaults_and_clamps(write_profile):
 def test_bad_question_rejected_before_any_request(dia_stub, write_profile, question):
     write_profile(settings={"endpoint": dia_stub.base_url})
 
-    _assert_failure(query(question))
+    _assert_failure(query(question), "validate")
     assert dia_stub.requests == []

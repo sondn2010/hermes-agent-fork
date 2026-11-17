@@ -2,8 +2,8 @@
 
 ``dia_stub`` serves the two routes of the real service (``POST /api/v1/query`` and
 ``GET /api/v1/query/test``) on 127.0.0.1 and records every request. ``write_profile`` writes the
-temp home's ``config.yaml`` / ``.env``; it enables ``security.allow_private_urls`` by default because
-the stub is a loopback address, which the SSRF guard otherwise refuses.
+temp home's ``config.yaml`` / ``.env``. The configured DIA endpoint may be a loopback or private
+host whatever ``security.allow_private_urls`` says; tests that pin that pass ``allow_private_urls``.
 """
 
 from __future__ import annotations
@@ -46,6 +46,8 @@ class DiaStub:
     raw_body: Optional[bytes] = None  # sent verbatim instead of ``payload`` (invalid JSON tests)
     hang: bool = False  # hold the response until teardown (timeout tests)
     redirect_to: Optional[str] = None  # answer the query with a 302 to this URL (redirect tests)
+    # Body of GET /api/v1/query/test; the real service answers HTTP 200 even when unhealthy.
+    health_payload: Any = field(default_factory=lambda: {"status": "success", "total_documents": 1})
     requests: list[StubRequest] = field(default_factory=list)
     release: threading.Event = field(default_factory=threading.Event)
 
@@ -68,7 +70,7 @@ def _handler_for(stub: DiaStub) -> type[BaseHTTPRequestHandler]:
         def do_GET(self) -> None:
             stub.requests.append(StubRequest("GET", self.path, dict(self.headers), None))
             if self.path == HEALTH_PATH:
-                self._send(200, json.dumps({"status": "success", "total_documents": 1}).encode())
+                self._send(200, json.dumps(stub.health_payload).encode())
             else:
                 self._send(404, b'{"detail": "Not Found"}')
 

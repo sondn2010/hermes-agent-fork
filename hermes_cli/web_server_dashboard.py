@@ -849,7 +849,8 @@ def _merged_plugins_hub(force_refresh: bool = False) -> dict[str, Any]:
         })
 
     agent_names = {r["name"] for r in rows}
-    orphan_dashboard = [_strip_dashboard_manifest(p) for p in dashboard_list if str(p["name"]) not in agent_names]
+    orphan_dashboard = [{**_strip_dashboard_manifest(p), "user_hidden": str(p["name"]) in hidden_plugins}
+                        for p in dashboard_list if str(p["name"]) not in agent_names]
     memory_providers = _discover_memory_provider_statuses()
     try:
         context_engines = [{"name": n, "description": desc} for n, desc in _discover_context_engines()]

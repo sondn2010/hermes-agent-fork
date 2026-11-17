@@ -103,13 +103,18 @@ def load_settings() -> DiaSettings:
     )
 
 
-def is_common_enabled() -> bool:
-    """True when ``bkt-dia-common`` is in ``plugins.enabled`` and not in ``plugins.disabled``."""
+def is_module_enabled(name: str) -> bool:
+    """True when plugin *name* is in ``plugins.enabled`` and not in ``plugins.disabled`` (read now)."""
     plugins = _plugins_section(_config())
     enabled, disabled = plugins.get("enabled"), plugins.get("disabled")
-    if not isinstance(enabled, list) or PLUGIN_ID not in enabled:
+    if not isinstance(enabled, list) or name not in enabled:
         return False
-    return not (isinstance(disabled, list) and PLUGIN_ID in disabled)
+    return not (isinstance(disabled, list) and name in disabled)
+
+
+def is_common_enabled() -> bool:
+    """True when ``bkt-dia-common`` itself is enabled: the opt-in gate for every query."""
+    return is_module_enabled(PLUGIN_ID)
 
 
 def query_url(endpoint: str) -> str:

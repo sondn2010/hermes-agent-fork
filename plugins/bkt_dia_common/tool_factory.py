@@ -56,8 +56,10 @@ naming declared properties. Tools are read-only. ``toolset == manifest name`` an
 cross-module contract test, not at load: ``ctx`` exposes no manifest (the validate probe's ctx has none).
 
 Tool results (JSON string): ``{"ok": true, "answer", "type", "sources", "function_code"}`` or
-``{"ok": false, "error", "hint", "function_code"}``. See ``query_client.query`` for the failure
-cases (disabled ``bkt-dia-common``, unset/unsafe endpoint, timeout, non-2xx, invalid JSON).
+``{"ok": false, "error", "hint", "stage", "function_code"}``. See ``query_client.query`` for the
+failure cases (disabled ``bkt-dia-common``, unset/unsafe endpoint, timeout, non-2xx, invalid JSON).
+The agent handler and the dashboard console both run a tool through :func:`run_query_tool`, so
+validation, rendering, the fail-closed checks and the per-profile run log behave the same for both.
 
 How a module's toolset reaches the agent
 ========================================
@@ -77,9 +79,11 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
+from plugins.bkt_dia_common import run_log
 from plugins.bkt_dia_common.query_client import query
 
 logger = logging.getLogger(__name__)
@@ -177,19 +181,67 @@ def _missing_required(tool: Mapping[str, Any], args: Mapping[str, Any]) -> list[
     return [name for name in required if not _format_value(args.get(name))]
 
 
-def make_handler(function_code: str, tool: Mapping[str, Any]) -> Callable[..., str]:
-    """Build the registry handler for one tool spec: render, query, stamp ``function_code``."""
-    template = tool["question_template"]
+def _step(key: str, status: str, started: float | None = None) -> dict[str, Any]:
+    ms = int((time.monotonic() - started) * 1000) if started is not None else 0
+    return {"key": key, "status": status, "ms": ms}
+
+
+def _query_steps(result: Mapping[str, Any], started: float) -> list[dict[str, Any]]:
+    """The ``query`` and ``result`` steps: a bad response body fails ``result``, anything else ``query``."""
+    if result["ok"]:
+        return [_step("query", "ok", started), _step("result", "ok")]
+    if result.get("stage") == "response":
+        return [_step("query", "ok", started), _step("result", "error")]
+    return [_step("query", "error", started), _step("result", "skipped")]
+
+
+def run_query_tool(module: Mapping[str, Any], tool: Mapping[str, Any], args: Any, *,
+                   source: str) -> dict[str, Any]:
+    """Run one tool of *module* for *source* (``agent`` or ``console``) and log the run.
+
+    Returns the query result plus ``function_code``, the rendered ``question`` (absent when the
+    arguments fail validation) and ``steps``: ``validate``, ``build_question``, ``query``, ``result``,
+    each ``{"key", "status": "ok"|"error"|"skipped", "ms"}``.
+    """
+    started = time.monotonic()
+    args = args if isinstance(args, Mapping) else {}
+    missing = _missing_required(tool, args)
+    question = None
+    if missing:
+        result: dict[str, Any] = {"ok": False, "error": f"missing required argument(s): {', '.join(missing)}",
+                                  "hint": "ask the user for the missing value instead of guessing it",
+                                  "stage": "validate"}
+        steps = [_step("validate", "error", started)] + [
+            _step(key, "skipped") for key in ("build_question", "query", "result")]
+    else:
+        steps = [_step("validate", "ok", started)]
+        build_started = time.monotonic()
+        question = render_question(tool["question_template"], args)
+        steps.append(_step("build_question", "ok", build_started))
+        query_started = time.monotonic()
+        result = query(question)
+        steps += _query_steps(result, query_started)
+    run_log.record({"module": module["toolset"], "tool": tool["name"], "source": source, "ok": result["ok"],
+                    "stage": result.get("stage"), "error": result.get("error"),
+                    "duration_ms": int((time.monotonic() - started) * 1000), "question": question})
+    output = {**result, "function_code": module["function_code"], "steps": steps}
+    if question is not None:
+        output["question"] = question
+    return output
+
+
+def make_handler(module: Mapping[str, Any], tool: Mapping[str, Any]) -> Callable[..., str]:
+    """Build the registry handler for one tool spec: :func:`run_query_tool` as a JSON tool result.
+
+    The agent sees the query result and ``function_code`` only; ``steps`` and the rendered
+    ``question`` are for the console.
+    """
 
     def handler(args: Any, **_kwargs: Any) -> str:
-        args = args if isinstance(args, Mapping) else {}
-        missing = _missing_required(tool, args)
-        if missing:
-            result = {"ok": False, "error": f"missing required argument(s): {', '.join(missing)}",
-                      "hint": "ask the user for the missing value instead of guessing it"}
-        else:
-            result = query(render_question(template, args))
-        return json.dumps({**result, "function_code": function_code}, ensure_ascii=False)
+        result = run_query_tool(module, tool, args, source="agent")
+        result.pop("steps")
+        result.pop("question", None)
+        return json.dumps(result, ensure_ascii=False)
 
     return handler
 
@@ -205,7 +257,7 @@ def register_query_tools(ctx: Any, module: Mapping[str, Any]) -> list[str]:
         schema = {"name": tool["name"], "description": tool["description"],
                   "parameters": dict(tool["parameters"])}
         ctx.register_tool(name=tool["name"], toolset=module["toolset"], schema=schema,
-                          handler=make_handler(module["function_code"], tool),
+                          handler=make_handler(module, tool),
                           description=tool["description"], emoji=module.get("emoji", "🔎"))
         registered.append(tool["name"])
     return registered
