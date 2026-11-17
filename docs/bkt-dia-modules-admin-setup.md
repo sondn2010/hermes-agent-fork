@@ -3,12 +3,17 @@
 > **English summary.** Point `bkt-dia-common` at the DIA ES query service with
 > `plugins.entries.bkt-dia-common.settings.endpoint` (required; `timeout_seconds` default 15,
 > max 60; `max_sources` default 20, max 100). An optional bearer key goes in the profile's `.env`
-> as `BKT_DIA_QUERY_API_KEY`. A private or loopback endpoint needs
-> `security.allow_private_urls: true`; cloud-metadata addresses are always refused. Enable
+> as `BKT_DIA_QUERY_API_KEY`. A private or loopback endpoint works without
+> `security.allow_private_urls`; only cloud-metadata targets, URLs carrying a username/password and
+> ambiguous hosts are refused, and redirects are never followed. Enable
 > `bkt-dia-common` plus only the modules you need (`hermes plugins enable <name>` or the
 > dashboard BKT Modules page); every module is opt-in and each profile has its own list. Changes
 > apply to new sessions. The tools fail closed with `{"ok": false, "error", "hint"}` and never
-> fabricate data. The full use-case coverage matrix is in section 6.
+> fabricate data; each failure names its `stage` (section 5). The dashboard **DIA AI Console**
+> (`/dia`) runs module tools, checks service health and lists recent runs and DIA cron monitors
+> (section 4a); its run log is `<home>/plugin-data/bkt-dia-common/runs.db` (newest 500 rows, a
+> redacted 200-character question preview, never answers). Hiding a UI with Show UI writes
+> `dashboard.hidden_plugins`. The full use-case coverage matrix is in section 6.
 
 Hướng dẫn cho người dùng cuối: [bkt-dia-modules-user-guide.md](bkt-dia-modules-user-guide.md).
 
@@ -22,7 +27,10 @@ Hướng dẫn cho người dùng cuối: [bkt-dia-modules-user-guide.md](bkt-di
   `category:<slug>`), `__init__.py` (biến `MODULE`: mã chức năng, toolset, công cụ, tham số) và
   `skills/<tên>/SKILL.md`. Danh sách công cụ của từng module xem ở `provides_tools` trong
   `plugin.yaml` tương ứng.
-- Trang dashboard: `web/src/pages/BktModulesPage.tsx` và `web/src/pages/bkt-modules/`.
+- Trang dashboard BKT Modules: `web/src/pages/BktModulesPage.tsx` và `web/src/pages/bkt-modules/`.
+- Trang dashboard DIA AI Console (`/dia`): `web/src/pages/DiaConsolePage.tsx` và
+  `web/src/pages/dia-console/`; backend là API dashboard của `bkt-dia-common`
+  (`plugins/bkt_dia_common/dashboard/plugin_api.py`, cùng `module_catalog.py` và `run_log.py`).
 
 Dịch vụ dữ liệu: dịch vụ truy vấn Elasticsearch của DIA (FastAPI), gồm
 `POST /api/v1/query` (body `{"question": "..."}`, trả về `{answer, question, type, sources}`) và
@@ -53,8 +61,6 @@ plugins:
         endpoint: http://dia-query.internal:8000
         timeout_seconds: 15
         max_sources: 20
-security:
-  allow_private_urls: true   # chỉ khi endpoint nằm trong mạng nội bộ hoặc loopback
 ```
 
 Hoặc bằng CLI (ghi vào `config.yaml` của hồ sơ đang dùng):
@@ -73,13 +79,16 @@ gửi dưới dạng `Authorization: Bearer ...`. Không ghi khóa vào `config.
 
 ### An toàn URL
 
-Trước mỗi yêu cầu, endpoint được kiểm tra bằng `tools.url_safety.is_safe_url` và yêu cầu được gửi
-với chuyển hướng bị tắt.
+Endpoint là cấu hình của quản trị viên, nên dịch vụ trong mạng nội bộ hoặc loopback được phép mà
+**không** cần `security.allow_private_urls`. Trước mỗi yêu cầu (kể cả kiểm tra sức khỏe), endpoint
+chỉ bị từ chối (`stage: url_safety`) khi:
 
-- Địa chỉ riêng (RFC 1918, loopback, ...) bị chặn trừ khi `security.allow_private_urls: true`.
-  Trong tiến trình không gắn hồ sơ riêng, giá trị này được lưu đệm trong suốt vòng đời tiến trình:
-  sau khi đổi, khởi động lại dashboard/gateway.
-- Địa chỉ metadata của cloud luôn bị từ chối, kể cả khi đã bật `allow_private_urls`.
+- trỏ tới địa chỉ metadata của cloud (theo IP hoặc theo tên miền sau khi phân giải);
+- chứa tên đăng nhập/mật khẩu trong URL (`user:pass@host`);
+- có phần host mơ hồ (các client khác nhau có thể hiểu thành host khác nhau).
+
+Yêu cầu được gửi với chuyển hướng bị tắt: phản hồi chuyển hướng không được đi theo. Nguồn:
+`_endpoint_refused_by_url_safety` và `_send` trong `plugins/bkt_dia_common/query_client.py`.
 
 ## 3. Bật/tắt module
 
@@ -123,22 +132,70 @@ khóa.
 Kiểm tra plugin trong repo: `hermes plugins validate plugins/<thư-mục>` và
 `hermes plugins doctor plugins/<thư-mục>`.
 
+Thẻ sức khỏe trên trang `/dia` gọi cùng `GET .../api/v1/query/test` qua Hermes (mục 4a).
+
+## 4a. DIA AI Console (`/dia`)
+
+Trang `/dia` của dashboard dùng API dashboard của `bkt-dia-common`, gắn tại
+`/api/plugins/bkt-dia-common/`. Mọi route cần token phiên dashboard và chạy theo hồ sơ của
+`?profile=` (cấu hình, khóa và nhật ký chạy đều của hồ sơ đó). Phản hồi không bao giờ chứa
+endpoint hay khóa API. Nguồn: `plugins/bkt_dia_common/dashboard/plugin_api.py`.
+
+| Route | Dùng cho |
+|---|---|
+| `GET /modules` | Module DIA và công cụ (schema tham số), danh mục, trạng thái bật, `common_enabled`, `endpoint_configured` (chỉ là cờ) |
+| `GET /health` | Thẻ sức khỏe dịch vụ truy vấn |
+| `POST /run` | Chạy một công cụ từ biểu mẫu: body `{module, tool, arguments}` (tham số tối đa 8 KiB JSON) |
+| `GET /runs?limit=N` | Các lần chạy gần nhất (mặc định 50, tối đa 500) |
+
+- **Thẻ sức khỏe cần:** `bkt-dia-common` được bật, `endpoint` hợp lệ và qua kiểm tra an toàn URL,
+  dịch vụ trả `status: success` tại `GET <endpoint>/api/v1/query/test`. Thẻ hiển thị số tài liệu và
+  độ trễ, hoặc `stage` cùng lỗi và gợi ý.
+- **Module tắt bị từ chối.** Module hoặc công cụ không tồn tại trả HTTP 404. Module chưa bật trong
+  hồ sơ bị từ chối với `stage: disabled` trước khi gửi yêu cầu, và không ghi nhật ký. Khi
+  `bkt-dia-common` tắt, lần chạy bị từ chối với `stage: disabled` và có ghi nhật ký. Lần chạy từ
+  trang đi cùng đường với công cụ của trợ lý (`run_query_tool` trong
+  `plugins/bkt_dia_common/tool_factory.py`).
+- **Backend có mặt trừ khi `bkt-dia-common` bị tắt tường minh.** Plugin đi kèm bản cài nên API được
+  gắn trừ khi nó nằm trong `plugins.disabled`. Mục "DIA AI Console" trên thanh điều hướng chỉ hiện
+  khi dashboard nhận được manifest của `bkt-dia-common`; mở thẳng `/dia` vẫn được.
+- **Nhật ký chạy.** Mỗi lần chạy công cụ DIA (nguồn `agent` từ trợ lý, `console` từ trang) ghi một
+  dòng vào `<home>/plugin-data/bkt-dia-common/runs.db` của hồ sơ: module, công cụ, nguồn, kết quả,
+  `stage`, lỗi, thời gian, và bản xem trước câu hỏi tối đa 200 ký tự đã che thông tin nhạy cảm.
+  Không lưu câu trả lời, nguồn, endpoint hay khóa. Giữ 500 dòng mới nhất. Nguồn:
+  `plugins/bkt_dia_common/run_log.py`.
+- **Giám sát** liệt kê tác vụ cron của hồ sơ có skill bắt đầu bằng `bkt-dia-` (đọc
+  `GET /api/cron/jobs` và `GET /api/cron/jobs/{id}/runs`). Tạo tác vụ bằng `hermes cron create`.
+- **Ẩn giao diện (`dashboard.hidden_plugins`).** Công tắc Show UI trên trang BKT Modules (và nút ẩn
+  khỏi thanh bên ở trang Plugins) ghi tên plugin vào `dashboard.hidden_plugins` trong `config.yaml`
+  của hồ sơ, qua `POST /api/dashboard/plugins/{name}/visibility`. Với một module `bkt-dia-*`: module
+  không hiện trên trang `/dia`; công cụ của trợ lý **không** đổi (bật/tắt là công tắc Enabled). Với
+  `bkt-dia-common` (dòng "DIA AI Console"): mục `/dia` biến mất khỏi thanh điều hướng; API và công
+  cụ vẫn chạy. Thay đổi có hiệu lực sau khi tải lại dashboard.
+
 ## 5. Xử lý sự cố
 
-Công cụ **fail closed**: trả `{"ok": false, "error", "hint"}` và không gửi yêu cầu khi cấu hình
-chưa hợp lệ. Skill hướng dẫn trợ lý báo lỗi kèm gợi ý thay vì đoán câu trả lời.
+Công cụ **fail closed**: trả `{"ok": false, "error", "hint", "stage"}` và không gửi yêu cầu khi
+cấu hình chưa hợp lệ. `stage` cho biết bước kiểm tra nào từ chối; trang `/dia` hiển thị nó trên thẻ
+sức khỏe, kết quả chạy và bảng lần chạy gần đây. Skill hướng dẫn trợ lý báo lỗi kèm gợi ý thay vì
+đoán câu trả lời.
 
-| Lỗi (`error`) | Nguyên nhân | Xử lý |
-|---|---|---|
-| `bkt-dia-common plugin is disabled` | `bkt-dia-common` không có trong `plugins.enabled` hoặc nằm trong `plugins.disabled` | Bật nó cho hồ sơ này |
-| `bkt-dia endpoint not configured` | Thiếu `endpoint` | Đặt `plugins.entries.bkt-dia-common.settings.endpoint` |
-| `bkt-dia endpoint is invalid: ...` | Không phải URL http(s) tuyệt đối | Sửa URL |
-| `bkt-dia endpoint blocked by URL safety policy` | Địa chỉ riêng/loopback hoặc metadata cloud | Với dịch vụ nội bộ tin cậy: `security.allow_private_urls: true` rồi khởi động lại |
-| `... did not answer within Ns` / HTTP 504 | Dịch vụ chậm hoặc câu hỏi quá rộng | Thu hẹp câu hỏi; kiểm tra dịch vụ; có thể tăng `timeout_seconds` (tối đa 60) |
-| `... is unreachable` | Không kết nối được | Kiểm tra endpoint, mạng, dịch vụ đang chạy |
-| HTTP 401/403 | Reverse proxy từ chối khóa | Kiểm tra `BKT_DIA_QUERY_API_KEY` trong `.env` của hồ sơ |
-| HTTP 5xx khác | Lỗi phía dịch vụ DIA | Xem log dịch vụ DIA |
-| `invalid JSON` / `unexpected response shape` | Endpoint trỏ sai dịch vụ hoặc sai phiên bản | Kiểm tra endpoint trỏ đúng dịch vụ truy vấn DIA |
+| `stage` | Lỗi (`error`) | Nguyên nhân | Xử lý |
+|---|---|---|---|
+| `validate` | `missing required argument(s): ...`, `question is empty`, `question is longer than 4000 characters` | Thiếu tham số bắt buộc, hoặc câu hỏi rỗng/quá dài | Điền đủ tham số; rút gọn câu hỏi |
+| `disabled` | `bkt-dia-common plugin is disabled` | `bkt-dia-common` không có trong `plugins.enabled` hoặc nằm trong `plugins.disabled` | Bật nó cho hồ sơ này |
+| `disabled` | `<tên module> plugin is disabled` | Chạy từ trang `/dia` một module chưa bật | Bật module trên trang BKT Modules |
+| `config` | `bkt-dia endpoint not configured` | Thiếu `endpoint` | Đặt `plugins.entries.bkt-dia-common.settings.endpoint` |
+| `config` | `bkt-dia endpoint is invalid: ...` | Không phải URL http(s) tuyệt đối | Sửa URL |
+| `config` | `bkt-dia settings could not be resolved for this profile` | Tiến trình phục vụ nhiều hồ sơ không gắn được phạm vi secret của hồ sơ | Kiểm tra cấu hình và `.env` của hồ sơ; chạy lại từ đúng hồ sơ |
+| `url_safety` | `bkt-dia endpoint blocked by URL safety policy` | Endpoint trỏ tới metadata cloud, chứa tên đăng nhập/mật khẩu, hoặc host mơ hồ | Trỏ endpoint thẳng tới host dịch vụ truy vấn DIA, không kèm thông tin đăng nhập |
+| `network` | `... did not answer within Ns` | Dịch vụ chậm hoặc câu hỏi quá rộng | Thu hẹp câu hỏi; kiểm tra dịch vụ; có thể tăng `timeout_seconds` (tối đa 60) |
+| `network` | `... is unreachable` | Không kết nối được | Kiểm tra endpoint, mạng, dịch vụ đang chạy |
+| `http` | HTTP 504 | Dịch vụ quá thời gian | Thu hẹp câu hỏi, thử lại sau |
+| `http` | HTTP 401/403 | Reverse proxy từ chối khóa | Kiểm tra `BKT_DIA_QUERY_API_KEY` trong `.env` của hồ sơ |
+| `http` | HTTP 5xx khác, hoặc mã khác ngoài 2xx | Lỗi phía dịch vụ DIA, chuyển hướng (không được đi theo), hoặc endpoint sai | Xem log dịch vụ DIA; kiểm tra endpoint trỏ thẳng tới dịch vụ |
+| `response` | `invalid JSON` / `unexpected response shape` | Endpoint trỏ sai dịch vụ hoặc sai phiên bản | Kiểm tra endpoint trỏ đúng dịch vụ truy vấn DIA |
+| `response` | `... reported status '...'` (chỉ khi kiểm tra sức khỏe) | Dịch vụ hoặc chỉ mục không khỏe | Xem log dịch vụ DIA |
 
 Khi `bkt-dia-common` được nạp mà `endpoint` trống hoặc sai, plugin ghi cảnh báo vào log
 (`hermes logs`).

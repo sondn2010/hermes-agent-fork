@@ -39,9 +39,9 @@ so the host's automatic management-profile suffix never names a different profil
 
 | Module | Symbol | Used by | Profile |
 |---|---|---|---|
-| `plugins.plugin_storage` | `plugin_db` | bkt-prompts `plugin_api.py` (connection opened per request) | `get_hermes_home()` per call, bound by the plugin route scope from `?profile=` |
+| `plugins.plugin_storage` | `plugin_db` | bkt-prompts `plugin_api.py`, bkt-dia-common `run_log.py` (connection opened per call) | `get_hermes_home()` per call, bound by the plugin route scope from `?profile=` |
 | `hermes_cli.web_server` | `_require_token` | bkt-prompts `plugin_api.py` | n/a |
-| `hermes_cli.web_server_dashboard` | `_plugin_route_secret_scope`, `_discover_dashboard_plugins`, `_plugin_api_mount_skip_reason` | route scope; phase 8 discovery test | binds `?profile=` |
+| `hermes_cli.web_server_dashboard` | `_plugin_route_secret_scope`, `_discover_dashboard_plugins`, `_plugin_api_mount_skip_reason` | route scope (also the bkt-dia-common console API); phase 8 discovery test | binds `?profile=` |
 
 bkt-health reads only core REST: `GET /api/profiles` (`gateway_running`), `GET /api/status`,
 `GET /api/messaging/platforms?profile=` (`platforms[].{id,enabled,configured,state,error_message}`)
@@ -75,7 +75,7 @@ and `POST /api/messaging/platforms/{id}/test?profile=`.
 
 | Module | Symbol | Used by | Profile |
 |---|---|---|---|
-| `hermes_cli.web_server` | `_require_token` | every route of bkt-profiles, bkt-prompts and bkt-files `plugin_api.py` | n/a (auth) |
+| `hermes_cli.web_server` | `_require_token` | every route of bkt-profiles, bkt-prompts, bkt-files and bkt-dia-common `plugin_api.py` | n/a (auth) |
 | `hermes_cli.credential_lifecycle` | `save_provider_env_credential`, `remove_provider_env_credential` | `plugin_api.py` generate and delete | the route scope binds the `?profile=` home and secret scope |
 | `hermes_cli.auth` | `has_usable_secret` | `plugin_api.py` key strength and the env-over-config rule | n/a |
 | `hermes_cli.config` | `load_env`, `load_config` | `plugin_api.py` key source, listener host and port | scoped home |
@@ -104,3 +104,31 @@ and `POST /api/gateway/restart` (query, in `PROFILE_TRANSPORT`).
 
 Core REST reused by the UI (not profile-scoped): `GET/DELETE /api/files`, `POST /api/files/mkdir`,
 `POST /api/files/upload-stream`, `GET /api/files/download`, `GET /api/files/stream`.
+
+## bkt-dia console
+
+The `/dia` page (core `web/src/pages/DiaConsolePage.tsx`) and the BKT Modules Show UI switches.
+The console backend is `plugins/bkt_dia_common/dashboard/plugin_api.py`. It reuses rows already
+listed above: `hermes_cli.web_server._require_token` (router dependency on every route),
+`plugins.plugin_storage.plugin_db` (`run_log.py`, `runs.db` per profile) and
+`_plugin_route_secret_scope` (binds `?profile=`, so config, secrets and the run log are the
+requesting profile's).
+
+| Module | Symbol | Used by | Profile |
+|---|---|---|---|
+| `tools.url_safety` | `is_always_blocked_url` | `plugins/bkt_dia_common/query_client.py` endpoint check (cloud-metadata floor without `security.allow_private_urls`) | n/a (resolves DNS; callers run it in a worker thread) |
+| `hermes_cli.web_server_dashboard` | `_merged_plugins_hub` | hub rows read by BKT Modules and the console: `plugins[].user_hidden`, and `orphan_dashboard_plugins[].user_hidden` (one-line BKT addition in this function) | `?profile=` via `config_scoped_to_thread` |
+
+`tools.url_safety.is_always_blocked_url` is not in the published plugin API
+(`hermes_cli/data/plugin_api.json` publishes `is_safe_url` and `create_ssrf_safe_async_client`),
+so this import is a core/plugin boundary crossing reported by `scripts/boundary_lint.py`. The `@` userinfo refusal next to it in
+`_endpoint_refused_by_url_safety` is BKT code, not upstream behaviour.
+
+Core REST used by the UI:
+
+| Endpoint | Transport | Source |
+|---|---|---|
+| `GET /api/dashboard/plugins/hub` (`user_hidden`, `orphan_dashboard_plugins`) | query | `hermes_cli/web_routers/dashboard_ui.py`, `hermes_cli/web_server_dashboard.py` `_merged_plugins_hub` |
+| `POST /api/dashboard/plugins/{name}/visibility` (`{hidden}`; writes `dashboard.hidden_plugins`) | query | `hermes_cli/web_routers/dashboard_ui.py` `post_plugin_visibility` |
+| `GET /api/dashboard/plugins` (omits hidden plugins; the `/dia` nav entry needs the `bkt-dia-common` manifest) | query | `hermes_cli/web_routers/dashboard_ui.py` `get_dashboard_plugins` |
+| `GET /api/cron/jobs`, `GET /api/cron/jobs/{job_id}/runs` | query | `hermes_cli/web_routers/cron.py` |

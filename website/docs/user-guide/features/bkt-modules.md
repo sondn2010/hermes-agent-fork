@@ -21,13 +21,28 @@ Open the dashboard (`hermes dashboard`) and choose **BKT Modules** in the naviga
 `/bkt-modules`. The desktop app embeds the same dashboard.
 
 - **Search** matches a module's name or description.
-- **Categories** and **Status** (all, enabled, disabled) narrow the list. All three filters
-  combine, and they are kept in the page URL, so a filtered view can be bookmarked or shared.
+- **Categories**, **Status** (all, enabled, disabled) and **UI** (all, shown, hidden) narrow the
+  list. The filters combine, and they are kept in the page URL, so a filtered view can be
+  bookmarked or shared.
 - Each module has a switch. Each category has a checkbox that shows how many of its modules are
   enabled and shows a mixed state when only some are. It switches the modules **currently
   visible** in that category, so active filters still apply.
 - The switches call the same enable/disable action as the [Plugins](./plugins.md) page and
   `hermes plugins enable|disable <name>`.
+
+### Show UI
+
+Rows that have a dashboard UI also carry a **Show UI** switch, and each category has a bulk Show
+UI switch. It writes the plugin name to `dashboard.hidden_plugins` in the profile's `config.yaml`,
+the same setting as the Plugins page's hide-from-sidebar action.
+
+- The BKT dashboard tabs are grouped under **Dashboard tabs**, which has only Show UI switches.
+  **Header logo** (`bkt-brand`) and **Credit line** (`bkt-author`) are labelled by what hiding
+  them removes.
+- The **DIA AI Console** row (`bkt-dia-common`) removes `/dia` from the navigation. Hiding a
+  `bkt-dia-*` module removes it from the console.
+- Show UI never changes the agent's tools; only the enable switch does.
+- The change applies after the dashboard reloads; the page offers a **Reload Dashboard** button.
 
 Rules that matter:
 
@@ -40,6 +55,18 @@ Rules that matter:
 - **Everything is opt-in.** All modules are disabled by default. Every enabled tool is sent with
   every model call, so enable only the modules you need.
 - **Per profile.** Each [profile](../profiles.md) keeps its own enabled list.
+
+## DIA AI Console
+
+The **DIA AI Console** (`/dia`) is the dashboard page for the DIA modules: query service health,
+a form per module tool that runs it and shows the request steps, answer and sources, the recent
+runs from both the agent and the console, and the profile's cron jobs whose skills start with
+`bkt-dia-`. The steps are Hermes-side request steps (validate, build question, query, result),
+not stages of the DIA service's own pipeline. A disabled module cannot be run from the console.
+
+Usage is described in `docs/bkt-dia-modules-user-guide.md` (Vietnamese, with an English summary);
+the backend routes, the run log and troubleshooting by failure `stage` are in
+`docs/bkt-dia-modules-admin-setup.md`.
 
 ## Categories and modules
 
@@ -70,7 +97,7 @@ the source records. They are read-only and never create or edit data.
   Coverage was judged from the service source, not checked against a live index.
 - Tools fail closed: if `bkt-dia-common` is disabled, the endpoint is unset, unsafe or
   unreachable, the request times out or the service returns an error, the tool returns
-  `{"ok": false, "error", "hint"}` and the agent reports it.
+  `{"ok": false, "error", "hint", "stage"}` and the agent reports it.
 
 ## Setup
 
@@ -90,8 +117,9 @@ hermes plugins enable bkt-dia-enterprise-profile
 
 - An optional bearer key goes in the profile's `.env` as `BKT_DIA_QUERY_API_KEY` (for a reverse
   proxy in front of the service; the service itself has no auth).
-- A private-network or loopback endpoint needs `security.allow_private_urls: true`. Cloud metadata
-  addresses are always refused.
+- A private-network or loopback endpoint works without `security.allow_private_urls`. Only
+  cloud-metadata targets, URLs carrying a username or password, and ambiguous hosts are refused;
+  redirects are never followed.
 - Health check: `GET <endpoint>/api/v1/query/test` returns HTTP 200 with a `status` field of
   `success` or `error`. Queries go to `POST <endpoint>/api/v1/query` with `{"question": "..."}`.
 
