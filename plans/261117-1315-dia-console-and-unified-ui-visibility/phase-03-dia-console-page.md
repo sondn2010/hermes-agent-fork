@@ -1,7 +1,7 @@
 ---
 phase: 3
 title: "DIA Console page"
-status: pending
+status: done
 priority: P1
 effort: "1d"
 dependencies: [2]
@@ -41,14 +41,15 @@ Create, all under `web/src/pages/`:
   - Inputs come from the JSON schema: string → text (textarea when the description says it is long), integer and number → number input, boolean → switch, `enum` → select.
   - Required fields are marked and block submit.
   - Run is disabled while pending.
+<!-- Updated: Validation Session 2 - manual refresh with last-updated timestamp and active elapsed timer during pending runs -->
 - `dia-console/dia-console-run-result.tsx`:
-  - A step timeline: `validate → build_question → query → result`, each with an ok/error/skipped icon and ms.
+  - A step timeline: `validate → build_question → query → result`, each with an ok/error/skipped icon and ms. While query is pending, displays an active elapsed timer in the step spinner (inheriting the backend ~30s timeout).
   - The rendered question, the answer as markdown, the type, and a sources list (render known keys such as `name`/`title`/`code`/`score`, otherwise compact key/value).
   - The error and hint, with a stage-specific message from i18n.
-- `dia-console/dia-console-recent-runs.tsx`: a table of time, module, tool, source, outcome/stage and duration. Refresh button.
+- `dia-console/dia-console-recent-runs.tsx`: a table of time, module, tool, source, outcome/stage and duration. Manual refresh button with last-updated timestamp.
 - `dia-console/dia-console-monitoring.tsx`:
   - Cron jobs whose `skills` include a name starting `bkt-dia-`.
-  - Shows name, schedule, enabled/paused, last run status and time, and a link to that run's output in the existing Cron page or route.
+  - Shows name, schedule, enabled/paused, last run status and time, and a link to that run's output in the existing Cron page or route. Refresh button with last-updated timestamp.
   - Empty state explains how to create a monitor (`hermes cron create` with the risk-monitor skill).
 - `dia-console/dia-console-grouping.ts`: pure helpers (group by category in `categories` order, filter hidden, monitoring-job filter) with a unit test.
 - `dia-console/dia-console-i18n.ts`: Vietnamese labels.

@@ -1,7 +1,7 @@
 ---
 title: "DIA AI Console page + one place to show/hide all BKT and DIA UIs"
 description: "A core /dia dashboard page with status, per-module run forms, recent runs and monitoring for the 20 bkt-dia modules, plus Show UI toggles for every bkt and DIA UI on the BKT Modules page."
-status: pending
+status: done
 priority: P2
 effort: 3d
 branch: feature/bktech
@@ -88,11 +88,11 @@ Every route calls `_require_token` and honours `?profile=` (bound by the host's 
 
 | # | Phase | Owner files | Depends on | Status |
 |---|---|---|---|---|
-| 01 | [Console backend in bkt-dia-common](phase-01-console-backend-plugin-api.md) | `plugins/bkt_dia_common/**`, `tests/plugins/bkt_dia/**`, `hermes_cli/web_server_dashboard.py`, `tests/hermes_cli/test_plugins_hub_tags.py` | — | pending |
-| 02 | [Web shared wiring: client, route, nav, i18n](phase-02-web-shared-wiring.md) | `web/src/lib/dia-console-api.ts`, `web/src/App.tsx`, `web/src/i18n/{types,en}.ts` | contract above | pending |
-| 03 | [DIA Console page](phase-03-dia-console-page.md) | `web/src/pages/DiaConsolePage*.tsx`, `web/src/pages/dia-console/**` | 02 | pending |
-| 04 | [BKT Modules: Show UI toggles](phase-04-bkt-modules-show-ui-toggles.md) | `web/src/pages/BktModulesPage*.tsx`, `web/src/pages/bkt-modules/**` | 02 | pending |
-| 05 | [Docs and full verification](phase-05-docs-and-verification.md) | `docs/bkt-dia-modules-*.md`, `website/docs/user-guide/features/bkt-modules.md`, `bkt/UPSTREAM-SEAMS.md` | 01–04 | pending |
+| 01 | [Console backend in bkt-dia-common](phase-01-console-backend-plugin-api.md) | `plugins/bkt_dia_common/**`, `tests/plugins/bkt_dia/**`, `hermes_cli/web_server_dashboard.py`, `tests/hermes_cli/test_plugins_hub_tags.py` | — | done |
+| 02 | [Web shared wiring: client, route, nav, i18n](phase-02-web-shared-wiring.md) | `web/src/lib/dia-console-api.ts`, `web/src/App.tsx`, `web/src/i18n/{types,en}.ts` | contract above | done |
+| 03 | [DIA Console page](phase-03-dia-console-page.md) | `web/src/pages/DiaConsolePage*.tsx`, `web/src/pages/dia-console/**` | 02 | done |
+| 04 | [BKT Modules: Show UI toggles](phase-04-bkt-modules-show-ui-toggles.md) | `web/src/pages/BktModulesPage*.tsx`, `web/src/pages/bkt-modules/**` | 02 | done |
+| 05 | [Docs and full verification](phase-05-docs-and-verification.md) | `docs/bkt-dia-modules-*.md`, `website/docs/user-guide/features/bkt-modules.md`, `bkt/UPSTREAM-SEAMS.md` | 01–04 | done |
 
 **Running phases in parallel.** Phases 01 and 02 run together; they share only the frozen contract. Phases 03 and 04 run together after 02, with disjoint directories. Phase 02 alone touches the shared web files (`App.tsx`, i18n), so 03 and 04 never edit them.
 
@@ -147,6 +147,41 @@ Every route calls `_require_token` and honours `?profile=` (bound by the host's 
    - Private and internal hosts work without the global `security.allow_private_urls`. Metadata and ambiguous authorities stay blocked, and redirects are still not followed.
    - Changes: phase 01 (code and tests), phase 05 (admin docs).
 
+### Session 2 (2026-11-17)
+**Trigger:** `/agy-plan validate` execution gate
+**Questions asked:** 3
+
+#### Questions & Answers
+
+1. **[Architecture/Performance]** How should the Recent Runs and Monitoring tabs in the DIA Console handle data updates?
+   - Options: (Recommended) Manual refresh button with last-updated timestamp | Auto-refresh Recent Runs table automatically whenever a tool is run from the Console tab | Add optional periodic polling toggle (e.g. every 15s/30s)
+   - **Answer:** (Recommended) Manual refresh button with last-updated timestamp (avoids unprompted polling and preserves host performance)
+   - **Rationale:** Keeps the client lightweight and predictable without background network chatter or unsolicited query traffic against host endpoints.
+
+2. **[Architecture/UX]** When toggling 'Show UI' for modules on `/bkt-modules`, how should the change be reflected to the user?
+   - Options: (Recommended) Refresh notice with a 1-click 'Reload Dashboard' action button directly in the notice banner | Refresh notice banner only (manual F5) | Immediate local state update for DIA module panels
+   - **Answer:** (Recommended) Refresh notice with a 1-click 'Reload Dashboard' action button directly in the notice banner (`window.location.reload()`)
+   - **Rationale:** Provides zero-friction UX so user can immediately apply visibility configuration without guessing how to reload or desyncing complex shell plugin registries.
+
+3. **[Architecture/UX]** How should long-running tool queries in the DIA Console run form be handled?
+   - Options: (Recommended) Inherit backend DIA client timeout (~30s) and show an active elapsed timer in the step timeline spinner | Add client-side 'Cancel Run' (AbortController) button | Expose optional timeout selector
+   - **Answer:** (Recommended) Inherit backend DIA client timeout (~30s) and show an active elapsed timer in the step timeline spinner
+   - **Rationale:** Matches standard backend timeout semantics, prevents hanging UI without redundant AbortController abort handling, while providing clear user feedback during long operations.
+
+#### Confirmed Decisions
+- Recent runs & monitoring refresh: Manual refresh button with last-updated timestamp.
+- BKT Modules Show UI notice: Banner includes a 1-click "Reload Dashboard" action button.
+- Console tool query execution: Inherits backend ~30s timeout, displays an active elapsed timer in the timeline step spinner.
+
+#### Action Items
+- [x] Phase 03: Ensure `dia-console-recent-runs.tsx` and `dia-console-monitoring.tsx` show last-updated timestamp next to the Refresh button.
+- [x] Phase 03: Ensure `dia-console-run-result.tsx` displays active elapsed timer during pending runs.
+- [x] Phase 04: Add 1-click "Reload Dashboard" action button to `bkt-modules-notices.tsx`.
+
+#### Impact on Phases
+- Phase 03: Updated `dia-console-recent-runs.tsx` & `dia-console-monitoring.tsx` specifications for last-updated timestamp, and `dia-console-run-result.tsx` for elapsed timer during execution.
+- Phase 04: Updated `bkt-modules-notices.tsx` specification to include "Reload Dashboard" button (`window.location.reload()`).
+
 ### Verification Results
 
 - Claims checked: 14. Verified: 14. Failed: 0. Unverified: 0. Tier: Full (5 phases).
@@ -171,9 +206,16 @@ Every route calls `_require_token` and honours `?profile=` (bound by the host's 
 
 ### Whole-Plan Consistency Sweep
 
-- M1 has moved from Non-goals and Unresolved into phases 01 and 05.
-- The spec-steps question is closed as a non-goal.
-- No contradictions remain between `plan.md`, the phase files, and the frozen API contract.
+- Session 1:
+  - M1 has moved from Non-goals and Unresolved into phases 01 and 05.
+  - The spec-steps question is closed as a non-goal.
+  - No contradictions remain between `plan.md`, the phase files, and the frozen API contract.
+- Session 2:
+  - Files reread: `plan.md`, `phase-01-console-backend-plugin-api.md`, `phase-02-web-shared-wiring.md`, `phase-03-dia-console-page.md`, `phase-04-bkt-modules-show-ui-toggles.md`, `phase-05-docs-and-verification.md`.
+  - Propagated manual refresh with last-updated timestamp and active elapsed timer during pending runs to Phase 03 (`dia-console-recent-runs.tsx`, `dia-console-monitoring.tsx`, `dia-console-run-result.tsx`).
+  - Propagated 1-click "Reload Dashboard" action button to Phase 04 (`bkt-modules-notices.tsx`).
+  - Reconciled stale references: 0.
+  - Unresolved contradictions: 0.
 
 ## Red Team Review
 
@@ -206,3 +248,26 @@ Every route calls `_require_token` and honours `?profile=` (bound by the host's 
 ## Unresolved questions
 
 None.
+
+## Delivery (2026-11-17)
+
+All five phases are implemented and uncommitted on `feature/bktech`. Implementation and review reports are in `../reports/*-261117-1538-*.md`.
+
+- Gates:
+  - Backend: `scripts/run_tests.sh tests/plugins/bkt_dia tests/hermes_cli/test_plugins_hub_tags.py tests/ci/test_docs_drift.py tests/plugins/bkt_common/test_upstream_seams.py` gives 373 passed.
+  - Web: typecheck is clean. Lint has 0 errors and 29 warnings, all of them pre-existing. Vitest gives 556 of 556 passed.
+  - `web/src/lib/api.ts` is unchanged.
+  - `scripts/check` reports no findings in any touched file. It still fails on the pre-existing fork-wide shebangs, no-tmp, agents-md and blob-size checks.
+- Boundary lint: the gate's premise was stale. The baseline was already at 859/20 and failing on 19 un-baselined bkt and zalo crossings before this plan. This plan adds 2 deliberate crossings, `_require_token` and `is_always_blocked_url`, bringing it to 861/20. Both are recorded in `bkt/UPSTREAM-SEAMS.md`. `--update` was not run.
+- The prompt-surface test is Linux-only and was not run. No tools changed.
+- The manual dashboard check was not run.
+- Fixes from review:
+  - The catalog compiles module source directly, so a same-second edit cannot reuse a stale `.pyc`. This had caused a flaky catalog test.
+  - The run log swallows `OSError` and closes the connection if schema creation fails.
+  - A malformed `plugin.yaml` is now isolated to its own module.
+  - The `DiaModule` types are now nullable, with `error` and `sources_omitted`.
+- Review Low items left as they are:
+  - Disabled-module refusals are not logged.
+  - The log holds up to 550 rows between prunes; reads are capped at 500.
+  - DNS rebinding between the URL-safety check and httpx was the same gap before this plan, and the endpoint is admin config.
+  - A category bulk toggle does not skip rows that are already pending.

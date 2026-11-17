@@ -1,7 +1,7 @@
 ---
 phase: 2
 title: "Web shared wiring: client, route, nav, i18n"
-status: pending
+status: done
 priority: P1
 effort: "3h"
 dependencies: []

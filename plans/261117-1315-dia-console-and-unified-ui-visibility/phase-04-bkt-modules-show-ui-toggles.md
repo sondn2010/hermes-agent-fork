@@ -1,7 +1,7 @@
 ---
 phase: 4
 title: "BKT Modules: Show UI toggles"
-status: pending
+status: done
 priority: P1
 effort: "4h"
 dependencies: [2]
@@ -22,7 +22,8 @@ Every bkt and DIA UI can be shown or hidden from `/bkt-modules`. The page shows 
   - **DIA modules:** the module's panel in `/dia`. The console reads `user_hidden`.
   - **`bkt-dia-common`:** labelled "DIA AI Console". It hides the `/dia` nav entry.
   - Other agent-only `bkt-*` rows with no UI show no Show UI switch.
-- The Show UI change takes effect after a dashboard refresh. Show a one-line notice; don't promise it is live.
+<!-- Updated: Validation Session 2 - refresh notice banner includes 1-click Reload Dashboard button -->
+- The Show UI change takes effect after a dashboard refresh. Show a one-line notice with a 1-click "Reload Dashboard" button (`window.location.reload()`); don't promise it is live.
 
 ## Files
 
@@ -37,7 +38,7 @@ Modify:
 - `web/src/pages/bkt-modules/bkt-modules-row.tsx`: render the Show UI switch when `hasUi`, and the Enabled switch only for agent rows.
 - `web/src/pages/bkt-modules/bkt-modules-category-section.tsx`: the category-level Show UI bulk switch, next to the existing bulk Enabled switch. It is disabled while any row in the group is pending, the same rule as before.
 - `web/src/pages/bkt-modules/bkt-modules-filter-bar.tsx`: add the filter "UI: all / shown / hidden".
-- `web/src/pages/bkt-modules/bkt-modules-notices.tsx`: the refresh notice for visibility changes.
+- `web/src/pages/bkt-modules/bkt-modules-notices.tsx`: the refresh notice for visibility changes, with a 1-click "Reload Dashboard" action button.
 - `web/src/pages/bkt-modules/bkt-modules-i18n.ts`: vi labels.
 - `web/src/pages/BktModulesPage.tsx` and `BktModulesPage.test.tsx`.
 
