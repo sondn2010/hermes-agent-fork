@@ -1,24 +1,21 @@
 /**
- * Page-local state for BKT Modules: the hub-derived module list with optimistic
- * enable/disable, and the URL-backed filter state.
+ * Page-local state for BKT Modules: the hub-derived rows with two optimistic switches per
+ * row (agent Enabled, Show UI), and the URL-backed filter state.
  *
  * Sequencing invariant: a hub response is applied only if it is the newest fetch AND no
  * toggle started or settled while it was in flight. Toggles flip the row immediately,
  * roll back on failure, and once the last one settles a single debounced refetch
  * reconciles with the server — so a stale hub payload (or the server's short hub cache)
- * can never overwrite optimistic state.
+ * can never overwrite optimistic state. Both switches share that machinery; each keeps
+ * its own pending set so one in-flight write never locks the other switch of a row.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { useSearchParams } from "react-router";
 import { api } from "@/lib/api";
 import type { BktModulesPageStrings } from "@/i18n/types";
-import {
-  filtersToParams,
-  parseFilters,
-  toBktModules,
-  type BktModule,
-  type BktModulesFilters,
-} from "./bkt-modules-grouping";
+import { filtersToParams, parseFilters, type BktModule, type BktModulesFilters } from "./bkt-modules-grouping";
+import { hubToBktModules } from "./bkt-modules-hub-rows";
+import { errorMessage, requestPluginEnabled, requestPluginUiShown, withSetMember } from "./bkt-modules-requests";
 
 export type NotifyFn = (message: string, type: "error" | "success") => void;
 
@@ -27,39 +24,45 @@ export interface BktModulesController {
   modules: BktModule[] | null;
   loading: boolean;
   loadError: string | null;
-  /** Module names with a request in flight. */
+  /** Module names with an Enabled request in flight. */
   pending: ReadonlySet<string>;
-  /** Category slugs whose bulk toggle is in flight. */
+  /** Module names with a Show UI request in flight. */
+  uiPending: ReadonlySet<string>;
+  /** Category slugs whose bulk toggle (either switch) is in flight. */
   busyCategories: ReadonlySet<string>;
+  /** A Show UI change was saved; it takes effect after a dashboard reload. */
+  visibilityChanged: boolean;
   reload: () => void;
   toggleModule: (name: string, next: boolean) => Promise<void>;
   toggleCategory: (slug: string, names: readonly string[], next: boolean) => Promise<void>;
+  setShowUi: (name: string, show: boolean) => Promise<void>;
+  toggleCategoryUi: (slug: string, names: readonly string[], show: boolean) => Promise<void>;
 }
 
 /** Delay before the reconciling refetch, so a burst of toggles costs one hub read. */
 export const RECONCILE_DELAY_MS = 300;
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error && error.message ? error.message : String(error);
-}
+type ToggleField = "enabled" | "ui";
 
-/** One enable/disable call; resolves to an error message, or `null` on success. */
-async function setPluginEnabled(name: string, enabled: boolean): Promise<string | null> {
-  try {
-    const result = enabled ? await api.enableAgentPlugin(name) : await api.disableAgentPlugin(name);
-    return result.ok === false ? "rejected by the server" : null;
-  } catch (error) {
-    return errorMessage(error);
-  }
-}
+/** How each switch changes a row locally and on the server. */
+const FIELD_APPLY: Record<ToggleField, (module: BktModule, value: boolean) => BktModule> = {
+  enabled: (module, value) => ({ ...module, enabled: value }),
+  ui: (module, value) => ({ ...module, uiHidden: !value }),
+};
 
-function withSetMember<T>(set: ReadonlySet<T>, items: readonly T[], present: boolean): Set<T> {
-  const next = new Set(set);
-  for (const item of items) {
-    if (present) next.add(item);
-    else next.delete(item);
-  }
-  return next;
+const FIELD_REQUEST: Record<ToggleField, (name: string, value: boolean) => Promise<string | null>> = {
+  enabled: requestPluginEnabled,
+  ui: requestPluginUiShown,
+};
+
+interface FieldState {
+  pending: ReadonlySet<string>;
+  setPending: Dispatch<SetStateAction<ReadonlySet<string>>>;
+  failed: (name: string, error: string) => string;
+  /** Called once per user action in which at least one write succeeded; `null` for none. */
+  succeeded: (() => void) | null;
+  /** Toast after a fully successful bulk toggle; `null` for none. */
+  bulkMessage: ((count: number, value: boolean) => string) | null;
 }
 
 export function useBktModules(notify: NotifyFn, strings: BktModulesPageStrings): BktModulesController {
@@ -67,7 +70,9 @@ export function useBktModules(notify: NotifyFn, strings: BktModulesPageStrings):
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [pending, setPending] = useState<ReadonlySet<string>>(() => new Set());
+  const [uiPending, setUiPending] = useState<ReadonlySet<string>>(() => new Set());
   const [busyCategories, setBusyCategories] = useState<ReadonlySet<string>>(() => new Set());
+  const [visibilityChanged, setVisibilityChanged] = useState(false);
 
   const fetchSeq = useRef(0);
   const inflightMutations = useRef(0);
@@ -82,7 +87,7 @@ export function useBktModules(notify: NotifyFn, strings: BktModulesPageStrings):
       .then((hub) => {
         if (seq !== fetchSeq.current) return;
         if (inflightMutations.current > 0 || epoch !== mutationEpoch.current) return;
-        setModules(toBktModules(hub.plugins ?? []));
+        setModules(hubToBktModules(hub));
         setLoadError(null);
       })
       .catch((error: unknown) => {
@@ -124,68 +129,116 @@ export function useBktModules(notify: NotifyFn, strings: BktModulesPageStrings):
     }, RECONCILE_DELAY_MS);
   }, [load]);
 
-  const setEnabledLocally = useCallback((names: readonly string[], enabled: boolean) => {
+  const fields = useMemo<Record<ToggleField, FieldState>>(
+    () => ({
+      enabled: {
+        pending,
+        setPending,
+        failed: strings.toggleFailed,
+        succeeded: null,
+        bulkMessage: strings.categoryUpdated,
+      },
+      ui: {
+        pending: uiPending,
+        setPending: setUiPending,
+        failed: strings.showUiFailed,
+        succeeded: () => setVisibilityChanged(true),
+        bulkMessage: null,
+      },
+    }),
+    [pending, uiPending, strings],
+  );
+
+  const applyLocally = useCallback((field: ToggleField, names: readonly string[], value: boolean) => {
     const targets = new Set(names);
-    setModules((current) =>
-      current?.map((m) => (targets.has(m.name) ? { ...m, enabled } : m)) ?? current,
-    );
+    const apply = FIELD_APPLY[field];
+    setModules((current) => current?.map((m) => (targets.has(m.name) ? apply(m, value) : m)) ?? current);
   }, []);
 
-  const toggleModule = useCallback(
-    async (name: string, next: boolean) => {
-      if (pending.has(name)) return;
-      setPending((current) => withSetMember(current, [name], true));
-      setEnabledLocally([name], next);
+  const toggleOne = useCallback(
+    async (field: ToggleField, name: string, value: boolean) => {
+      const state = fields[field];
+      if (state.pending.has(name)) return;
+      state.setPending((current) => withSetMember(current, [name], true));
+      applyLocally(field, [name], value);
       beginMutation();
       try {
-        const error = await setPluginEnabled(name, next);
+        const error = await FIELD_REQUEST[field](name, value);
         if (error !== null) {
-          setEnabledLocally([name], !next);
-          notify(strings.toggleFailed(name, error), "error");
+          applyLocally(field, [name], !value);
+          notify(state.failed(name, error), "error");
+        } else {
+          state.succeeded?.();
         }
       } finally {
-        setPending((current) => withSetMember(current, [name], false));
+        state.setPending((current) => withSetMember(current, [name], false));
         endMutation();
       }
     },
-    [pending, setEnabledLocally, beginMutation, endMutation, notify, strings],
+    [fields, applyLocally, beginMutation, endMutation, notify],
   );
 
-  const toggleCategory = useCallback(
-    async (slug: string, names: readonly string[], next: boolean) => {
+  const toggleMany = useCallback(
+    async (field: ToggleField, slug: string, names: readonly string[], value: boolean) => {
       if (busyCategories.has(slug) || names.length === 0) return;
+      const state = fields[field];
       setBusyCategories((current) => withSetMember(current, [slug], true));
-      setPending((current) => withSetMember(current, names, true));
-      setEnabledLocally(names, next);
+      state.setPending((current) => withSetMember(current, names, true));
+      applyLocally(field, names, value);
       beginMutation();
       const failures: string[] = [];
       try {
         // Sequential on purpose: each call rewrites config.yaml, and parallel writers would contend.
         for (const name of names) {
-          const error = await setPluginEnabled(name, next);
+          const error = await FIELD_REQUEST[field](name, value);
           if (error !== null) {
             failures.push(name);
-            setEnabledLocally([name], !next);
+            applyLocally(field, [name], !value);
           }
         }
       } finally {
-        setPending((current) => withSetMember(current, names, false));
+        state.setPending((current) => withSetMember(current, names, false));
         setBusyCategories((current) => withSetMember(current, [slug], false));
         endMutation();
       }
+      if (failures.length < names.length) state.succeeded?.();
       if (failures.length > 0) {
         notify(strings.categoryPartialFailure(failures.length, names.length, failures.join(", ")), "error");
-      } else {
-        notify(strings.categoryUpdated(names.length, next), "success");
+      } else if (state.bulkMessage !== null) {
+        notify(state.bulkMessage(names.length, value), "success");
       }
     },
-    [busyCategories, setEnabledLocally, beginMutation, endMutation, notify, strings],
+    [busyCategories, fields, applyLocally, beginMutation, endMutation, notify, strings],
   );
 
-  return { modules, loading, loadError, pending, busyCategories, reload, toggleModule, toggleCategory };
+  const toggleModule = useCallback((name: string, next: boolean) => toggleOne("enabled", name, next), [toggleOne]);
+  const setShowUi = useCallback((name: string, show: boolean) => toggleOne("ui", name, show), [toggleOne]);
+  const toggleCategory = useCallback(
+    (slug: string, names: readonly string[], next: boolean) => toggleMany("enabled", slug, names, next),
+    [toggleMany],
+  );
+  const toggleCategoryUi = useCallback(
+    (slug: string, names: readonly string[], show: boolean) => toggleMany("ui", slug, names, show),
+    [toggleMany],
+  );
+
+  return {
+    modules,
+    loading,
+    loadError,
+    pending,
+    uiPending,
+    busyCategories,
+    visibilityChanged,
+    reload,
+    toggleModule,
+    toggleCategory,
+    setShowUi,
+    toggleCategoryUi,
+  };
 }
 
-/** Filter state kept in the URL query (`?q=&cat=&status=`) so a view can be shared. */
+/** Filter state kept in the URL query (`?q=&cat=&status=&ui=`) so a view can be shared. */
 export function useBktModulesFilters(): [BktModulesFilters, (next: BktModulesFilters) => void] {
   const [params, setParams] = useSearchParams();
   const filters = useMemo(() => parseFilters(params), [params]);

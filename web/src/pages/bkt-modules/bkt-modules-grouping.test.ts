@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { HubAgentPluginRow } from "@/lib/api";
 import {
   availableCategories,
   categoryFromTags,
+  DASHBOARD_TABS_CATEGORY,
   DEFAULT_FILTERS,
   diaCommonInactive,
   filtersToParams,
@@ -10,31 +10,26 @@ import {
   needsDiaCommonWarning,
   parseFilters,
   titleCaseSlug,
-  toBktModules,
   type BktModule,
 } from "./bkt-modules-grouping";
 
-function row(name: string, tags: string[], runtime_status: HubAgentPluginRow["runtime_status"] = "inactive"): HubAgentPluginRow {
+function mod(name: string, category: string, enabled = false, description = "", extra: Partial<BktModule> = {}): BktModule {
   return {
     name,
-    version: "0.1.0",
-    description: `${name} description`,
-    source: "bundled",
-    runtime_status,
-    has_dashboard_manifest: false,
-    dashboard_manifest: null,
-    path: `/plugins/${name}`,
-    can_remove: false,
-    can_update_git: false,
-    auth_required: false,
-    auth_command: "",
-    user_hidden: false,
-    tags,
+    kind: "agent",
+    category,
+    enabled,
+    description,
+    version: "1.0.0",
+    hasUi: false,
+    uiHidden: false,
+    uiLabel: "",
+    ...extra,
   };
 }
 
-function mod(name: string, category: string, enabled = false, description = ""): BktModule {
-  return { name, category, enabled, description, version: "1.0.0" };
+function tab(name: string, uiHidden = false): BktModule {
+  return mod(name, DASHBOARD_TABS_CATEGORY, false, "", { kind: "dashboard", hasUi: true, uiHidden });
 }
 
 describe("categoryFromTags", () => {
@@ -47,25 +42,6 @@ describe("categoryFromTags", () => {
     expect(categoryFromTags([])).toBe("uncategorized");
     expect(categoryFromTags(["category:  "])).toBe("uncategorized");
     expect(categoryFromTags([42, null])).toBe("uncategorized");
-  });
-});
-
-describe("toBktModules", () => {
-  it("keeps only bkt-* rows and derives enabled + category", () => {
-    const modules = toBktModules([
-      row("bkt-dia-common", ["bkt", "category:shared"], "enabled"),
-      row("other-plugin", ["category:shared"], "enabled"),
-      row("bkt-legacy", [], "disabled"),
-    ]);
-    expect(modules.map((m) => [m.name, m.category, m.enabled])).toEqual([
-      ["bkt-dia-common", "shared", true],
-      ["bkt-legacy", "uncategorized", false],
-    ]);
-  });
-
-  it("tolerates a row without tags from an older backend", () => {
-    const legacy = { ...row("bkt-old", []), tags: undefined } as unknown as HubAgentPluginRow;
-    expect(toBktModules([legacy])[0].category).toBe("uncategorized");
   });
 });
 
@@ -94,13 +70,13 @@ describe("groupModules", () => {
     const byText = groupModules(modules, { ...DEFAULT_FILTERS, q: "INGEST" });
     expect(byText.flatMap((g) => g.modules.map((m) => m.name))).toEqual(["bkt-dia-document-intake"]);
 
-    const byCategoryAndStatus = groupModules(modules, { q: "", categories: ["knowledge-rag", "shared"], status: "enabled" });
+    const byCategoryAndStatus = groupModules(modules, { ...DEFAULT_FILTERS, categories: ["knowledge-rag", "shared"], status: "enabled" });
     expect(byCategoryAndStatus.map((g) => [g.slug, g.modules.map((m) => m.name)])).toEqual([
       ["shared", ["bkt-dia-common"]],
       ["knowledge-rag", ["bkt-dia-rag-retrieval"]],
     ]);
 
-    const nothing = groupModules(modules, { q: "retrieval", categories: ["shared"], status: "all" });
+    const nothing = groupModules(modules, { ...DEFAULT_FILTERS, q: "retrieval", categories: ["shared"] });
     expect(nothing).toEqual([]);
 
     const disabled = groupModules(modules, { ...DEFAULT_FILTERS, status: "disabled" });
@@ -109,6 +85,48 @@ describe("groupModules", () => {
 
   it("lists available categories in display order", () => {
     expect(availableCategories(modules)).toEqual(["shared", "knowledge-rag", "alpha-things", "zeta-things", "uncategorized"]);
+  });
+});
+
+describe("Show UI grouping", () => {
+  const modules = [
+    tab("bkt-files"),
+    tab("bkt-brand", true),
+    mod("bkt-dia-common", "shared", true, "", { hasUi: true }),
+    mod("bkt-dia-finance-tax", "domain-lookup", false, "", { hasUi: true, uiHidden: true }),
+    mod("bkt-agent-only", "domain-lookup", true),
+  ];
+
+  it("puts dashboard tabs last with only a UI bulk state", () => {
+    const groups = groupModules(modules, DEFAULT_FILTERS);
+    expect(groups.map((g) => g.slug)).toEqual(["shared", "domain-lookup", DASHBOARD_TABS_CATEGORY]);
+    const tabs = groups[2];
+    expect(tabs.agentCount).toBe(0);
+    expect(tabs.state).toBeNull();
+    expect(tabs.uiState).toBe("mixed");
+  });
+
+  it("derives the Enabled state from agent rows and the UI state from rows with a UI", () => {
+    const lookup = groupModules(modules, DEFAULT_FILTERS)[1];
+    expect(lookup.agentCount).toBe(2);
+    expect(lookup.enabledCount).toBe(1);
+    expect(lookup.state).toBe("mixed");
+    // Only finance-tax has a UI, and it is hidden.
+    expect(lookup.uiState).toBe("off");
+  });
+
+  it("filters by UI state, dropping rows without a UI", () => {
+    const names = (ui: "shown" | "hidden") =>
+      groupModules(modules, { ...DEFAULT_FILTERS, ui }).flatMap((g) => g.modules.map((m) => m.name));
+    expect(names("shown")).toEqual(["bkt-dia-common", "bkt-files"]);
+    expect(names("hidden")).toEqual(["bkt-dia-finance-tax", "bkt-brand"]);
+  });
+
+  it("keeps dashboard tabs out of the Enabled status filters", () => {
+    const enabled = groupModules(modules, { ...DEFAULT_FILTERS, status: "enabled" });
+    const disabled = groupModules(modules, { ...DEFAULT_FILTERS, status: "disabled" });
+    expect(enabled.flatMap((g) => g.modules.map((m) => m.name))).toEqual(["bkt-dia-common", "bkt-agent-only"]);
+    expect(disabled.flatMap((g) => g.modules.map((m) => m.name))).toEqual(["bkt-dia-finance-tax"]);
   });
 });
 
@@ -136,7 +154,7 @@ describe("labels and warnings", () => {
 describe("URL filter round-trip", () => {
   it("parses and normalizes query params", () => {
     const filters = parseFilters(new URLSearchParams("q=tax&cat=Domain-Lookup,shared,,shared&status=ENABLED"));
-    expect(filters).toEqual({ q: "tax", categories: ["domain-lookup", "shared"], status: "enabled" });
+    expect(filters).toEqual({ q: "tax", categories: ["domain-lookup", "shared"], status: "enabled", ui: "all" });
   });
 
   it("falls back to defaults for malformed values", () => {
@@ -145,7 +163,15 @@ describe("URL filter round-trip", () => {
 
   it("serializes only non-default values and round-trips", () => {
     expect(filtersToParams(DEFAULT_FILTERS).toString()).toBe("");
-    const filters = { q: "rag", categories: ["knowledge-rag", "shared"], status: "disabled" as const };
+    const filters = { q: "rag", categories: ["knowledge-rag", "shared"], status: "disabled" as const, ui: "all" as const };
     expect(parseFilters(filtersToParams(filters))).toEqual(filters);
+  });
+
+  it("round-trips the UI filter and rejects unknown values", () => {
+    const filters = { ...DEFAULT_FILTERS, ui: "hidden" as const };
+    expect(filtersToParams(filters).toString()).toBe("ui=hidden");
+    expect(parseFilters(filtersToParams(filters))).toEqual(filters);
+    expect(parseFilters(new URLSearchParams("ui=SHOWN")).ui).toBe("shown");
+    expect(parseFilters(new URLSearchParams("ui=maybe")).ui).toBe("all");
   });
 });

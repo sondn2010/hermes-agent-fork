@@ -7,8 +7,10 @@ import type { BktModulesPageStrings } from "@/i18n/types";
 import {
   DEFAULT_FILTERS,
   STATUS_FILTERS,
+  UI_FILTERS,
   type BktModulesFilters,
   type StatusFilter,
+  type UiFilter,
 } from "./bkt-modules-grouping";
 import { categoryLabel } from "./bkt-modules-i18n";
 
@@ -16,6 +18,12 @@ const STATUS_LABEL_KEY: Record<StatusFilter, "statusAll" | "statusEnabled" | "st
   all: "statusAll",
   enabled: "statusEnabled",
   disabled: "statusDisabled",
+};
+
+const UI_LABEL_KEY: Record<UiFilter, "uiFilterAll" | "uiFilterShown" | "uiFilterHidden"> = {
+  all: "uiFilterAll",
+  shown: "uiFilterShown",
+  hidden: "uiFilterHidden",
 };
 
 interface ToggleChipProps {
@@ -55,7 +63,8 @@ export function BktModulesFilterBar({ filters, categories, strings, onChange }: 
   const searchId = useId();
   const categoryLabelId = useId();
   const statusLabelId = useId();
-  const isDefault = !filters.q && filters.categories.length === 0 && filters.status === "all";
+  const uiLabelId = useId();
+  const isDefault = !filters.q && filters.categories.length === 0 && filters.status === "all" && filters.ui === "all";
 
   const toggleCategory = (slug: string) => {
     const selected = filters.categories.includes(slug)
@@ -100,6 +109,16 @@ export function BktModulesFilterBar({ filters, categories, strings, onChange }: 
               onClick={() => onChange({ ...filters, status })}
             >
               {strings[STATUS_LABEL_KEY[status]]}
+            </ToggleChip>
+          ))}
+        </div>
+        <span id={uiLabelId} className="text-xs text-muted-foreground">
+          {strings.uiFilterLabel}
+        </span>
+        <div role="group" aria-labelledby={uiLabelId} className="flex gap-1.5">
+          {UI_FILTERS.map((ui) => (
+            <ToggleChip key={ui} pressed={filters.ui === ui} onClick={() => onChange({ ...filters, ui })}>
+              {strings[UI_LABEL_KEY[ui]]}
             </ToggleChip>
           ))}
         </div>

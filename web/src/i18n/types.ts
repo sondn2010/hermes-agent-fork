@@ -46,6 +46,23 @@ export interface BktModulesPageStrings {
   toggleFailed: (name: string, error: string) => string;
   categoryUpdated: (count: number, enabled: boolean) => string;
   categoryPartialFailure: (failed: number, total: number, names: string) => string;
+  showUi: string;
+  uiShown: string;
+  uiHidden: string;
+  toggleShowUiLabel: (name: string) => string;
+  toggleCategoryShowUiLabel: (category: string) => string;
+  uiFilterLabel: string;
+  uiFilterAll: string;
+  uiFilterShown: string;
+  uiFilterHidden: string;
+  dashboardTabsGroup: string;
+  dashboardTab: string;
+  diaConsoleRow: string;
+  headerLogoRow: string;
+  creditLineRow: string;
+  visibilityRefreshNotice: string;
+  reloadDashboard: string;
+  showUiFailed: (name: string, error: string) => string;
   categories: {
     shared: string;
     "knowledge-rag": string;
@@ -56,6 +73,113 @@ export interface BktModulesPageStrings {
     "monitoring-personalization": string;
     uncategorized: string;
   };
+}
+
+/** DIA AI Console page strings; optional in `Translations`, English fallback at the call site. */
+export interface DiaConsolePageStrings {
+  title: string;
+  headline: string;
+  tabs: {
+    status: string;
+    recentRuns: string;
+    monitoring: string;
+  };
+  status: {
+    endpointConfigured: string;
+    endpointNotConfigured: string;
+    commonDisabled: string;
+    enabled: string;
+    disabled: string;
+    lastRun: string;
+    neverRun: string;
+    runOk: string;
+    runFailed: string;
+  };
+  health: {
+    title: string;
+    status: string;
+    documents: string;
+    latency: string;
+    ok: string;
+    error: string;
+    checking: string;
+    hint: string;
+  };
+  steps: {
+    validate: string;
+    build_question: string;
+    query: string;
+    result: string;
+  };
+  stepStatus: {
+    ok: string;
+    error: string;
+    skipped: string;
+    pending: string;
+  };
+  stages: {
+    validate: string;
+    disabled: string;
+    config: string;
+    url_safety: string;
+    network: string;
+    http: string;
+    response: string;
+  };
+  result: {
+    question: string;
+    answer: string;
+    type: string;
+    sources: string;
+    showMoreSources: (count: number) => string;
+    showFewerSources: string;
+  };
+  form: {
+    required: string;
+    requiredMissing: (field: string) => string;
+    selectPlaceholder: string;
+  };
+  recentRuns: {
+    time: string;
+    module: string;
+    tool: string;
+    source: string;
+    outcome: string;
+    duration: string;
+    sourceAgent: string;
+    sourceConsole: string;
+  };
+  monitoring: {
+    name: string;
+    schedule: string;
+    state: string;
+    lastRun: string;
+    active: string;
+    paused: string;
+    viewOutput: string;
+  };
+  empty: {
+    allHidden: string;
+    allHiddenHint: string;
+    noRuns: string;
+    noMonitors: string;
+    noMonitorsHint: string;
+    noTools: string;
+    noSources: string;
+  };
+  buttons: {
+    run: string;
+    running: string;
+    refresh: string;
+    reload: string;
+    openBktModules: string;
+  };
+  disabledModuleHint: string;
+  loadFailed: string;
+  runFailed: (error: string) => string;
+  lastUpdated: (time: string) => string;
+  elapsed: (seconds: string) => string;
+  durationMs: (ms: number) => string;
 }
 
 export interface Translations {
@@ -471,6 +595,9 @@ export interface Translations {
 
   // ── BKT Modules page (optional: locales without it fall back to English) ──
   bktModulesPage?: BktModulesPageStrings;
+
+  // ── DIA AI Console page (optional: locales without it fall back to English) ──
+  diaConsolePage?: DiaConsolePageStrings;
 
   // ── Profiles page ──
   profiles: {

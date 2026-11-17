@@ -23,6 +23,8 @@ const THUMB_POSITION: Record<CategorySwitchState, string> = {
 
 interface CategorySwitchProps {
   state: CategorySwitchState;
+  /** Visible caption; omitted for the Enabled switch when it is the only one. */
+  caption?: string;
   label: string;
   disabled: boolean;
   onToggle: () => void;
@@ -32,8 +34,8 @@ interface CategorySwitchProps {
  * Switch-styled tri-state control. `role="switch"` cannot express "partially on", so this is a
  * checkbox with `aria-checked="mixed"`; Space/Enter come from the native button.
  */
-function CategorySwitch({ state, label, disabled, onToggle }: CategorySwitchProps) {
-  return (
+function CategorySwitch({ state, caption, label, disabled, onToggle }: CategorySwitchProps) {
+  const control = (
     <button
       type="button"
       role="checkbox"
@@ -51,33 +53,56 @@ function CategorySwitch({ state, label, disabled, onToggle }: CategorySwitchProp
       <span aria-hidden className={cn("pointer-events-none block h-3.5 w-3.5 transition-transform", THUMB_POSITION[state])} />
     </button>
   );
+  if (!caption) return control;
+  return (
+    <span className="flex items-center gap-2">
+      <span aria-hidden className="text-xs text-muted-foreground">
+        {caption}
+      </span>
+      {control}
+    </span>
+  );
+}
+
+/** Off or mixed -> switch everything on; fully on -> switch everything off. */
+function bulkTarget(state: CategorySwitchState): boolean {
+  return state !== "on";
 }
 
 export interface BktModulesCategorySectionProps {
   group: BktCategoryGroup;
   strings: BktModulesPageStrings;
+  /** Names with an Enabled request in flight. */
   pending: ReadonlySet<string>;
+  /** Names with a Show UI request in flight. */
+  uiPending: ReadonlySet<string>;
   busy: boolean;
   diaCommonInactive: boolean;
   onToggleModule: (name: string, next: boolean) => void;
   onToggleCategory: (slug: string, names: readonly string[], next: boolean) => void;
+  onToggleShowUi: (name: string, show: boolean) => void;
+  onToggleCategoryUi: (slug: string, names: readonly string[], show: boolean) => void;
 }
 
 export function BktModulesCategorySection({
   group,
   strings,
   pending,
+  uiPending,
   busy,
   diaCommonInactive,
   onToggleModule,
   onToggleCategory,
+  onToggleShowUi,
+  onToggleCategoryUi,
 }: BktModulesCategorySectionProps) {
   const [expanded, setExpanded] = useState(true);
   const regionId = useId();
   const label = categoryLabel(group.slug, strings);
-  // Off or mixed → switch everything on; fully on → switch everything off.
-  const next = group.state !== "on";
-  const targets = group.modules.filter((m) => m.enabled !== next).map((m) => m.name);
+  const { state, uiState } = group;
+  // Both bulk switches lock while any row of the group has either request in flight.
+  const bulkLocked = busy || group.modules.some((m) => pending.has(m.name) || uiPending.has(m.name));
+  const bothSwitches = state !== null && uiState !== null;
 
   return (
     <Card className="overflow-hidden" data-category={group.slug} aria-busy={busy}>
@@ -93,16 +118,38 @@ export function BktModulesCategorySection({
           <span className="font-medium">{label.primary}</span>
           {label.vi ? <span className="truncate text-xs text-muted-foreground">{label.vi}</span> : null}
         </button>
-        <Badge tone={group.enabledCount > 0 ? "success" : "secondary"}>
-          {strings.categoryCount(group.enabledCount, group.modules.length)}
-        </Badge>
+        {group.agentCount > 0 ? (
+          <Badge tone={group.enabledCount > 0 ? "success" : "secondary"}>
+            {strings.categoryCount(group.enabledCount, group.agentCount)}
+          </Badge>
+        ) : null}
         {busy ? <span className="text-xs text-muted-foreground">{strings.updating}</span> : null}
-        <CategorySwitch
-          state={group.state}
-          label={strings.toggleCategoryLabel(label.primary)}
-          disabled={busy || group.modules.some((m) => pending.has(m.name))}
-          onToggle={() => onToggleCategory(group.slug, targets, next)}
-        />
+        {state !== null ? (
+          <CategorySwitch
+            state={state}
+            caption={bothSwitches ? strings.enabled : undefined}
+            label={strings.toggleCategoryLabel(label.primary)}
+            disabled={bulkLocked}
+            onToggle={() => {
+              const next = bulkTarget(state);
+              const names = group.modules.filter((m) => m.kind === "agent" && m.enabled !== next).map((m) => m.name);
+              onToggleCategory(group.slug, names, next);
+            }}
+          />
+        ) : null}
+        {uiState !== null ? (
+          <CategorySwitch
+            state={uiState}
+            caption={strings.showUi}
+            label={strings.toggleCategoryShowUiLabel(label.primary)}
+            disabled={bulkLocked}
+            onToggle={() => {
+              const show = bulkTarget(uiState);
+              const names = group.modules.filter((m) => m.hasUi && m.uiHidden === show).map((m) => m.name);
+              onToggleCategoryUi(group.slug, names, show);
+            }}
+          />
+        ) : null}
       </div>
       <ul id={regionId} hidden={!expanded} className="border-t border-border">
         {group.modules.map((module) => (
@@ -111,8 +158,10 @@ export function BktModulesCategorySection({
             module={module}
             strings={strings}
             disabled={busy || pending.has(module.name)}
+            uiDisabled={busy || uiPending.has(module.name)}
             showCommonWarning={needsDiaCommonWarning(module, diaCommonInactive)}
             onToggle={onToggleModule}
+            onToggleShowUi={onToggleShowUi}
           />
         ))}
       </ul>

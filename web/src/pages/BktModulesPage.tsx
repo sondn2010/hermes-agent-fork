@@ -9,9 +9,22 @@ import { useBktModulesStrings } from "@/pages/bkt-modules/bkt-modules-i18n";
 import { useBktModules, useBktModulesFilters } from "@/pages/bkt-modules/bkt-modules-store";
 import { BktModulesFilterBar } from "@/pages/bkt-modules/bkt-modules-filter-bar";
 import { BktModulesCategorySection } from "@/pages/bkt-modules/bkt-modules-category-section";
-import { BktModulesBanner, BktModulesEmptyState, BktModulesLoadError } from "@/pages/bkt-modules/bkt-modules-notices";
+import {
+  BktModulesBanner,
+  BktModulesEmptyState,
+  BktModulesLoadError,
+  BktModulesVisibilityNotice,
+} from "@/pages/bkt-modules/bkt-modules-notices";
 
-/** `/bkt-modules`: show/hide `bkt-*` plugins by category (enable/disable apply to new sessions). */
+/** Show UI changes are read when the dashboard loads, so applying them means a full reload. */
+function reloadDashboard() {
+  window.location.reload();
+}
+
+/**
+ * `/bkt-modules`: the one place to switch `bkt-*` plugins. Enabled (agent tools) applies to new
+ * sessions; Show UI (dashboard tabs, DIA panels, the DIA AI Console) applies after a dashboard reload.
+ */
 export default function BktModulesPage() {
   const { t } = useI18n();
   const strings = useBktModulesStrings();
@@ -59,10 +72,13 @@ export default function BktModulesPage() {
               group={group}
               strings={strings}
               pending={controller.pending}
+              uiPending={controller.uiPending}
               busy={controller.busyCategories.has(group.slug)}
               diaCommonInactive={commonInactive}
               onToggleModule={controller.toggleModule}
               onToggleCategory={controller.toggleCategory}
+              onToggleShowUi={controller.setShowUi}
+              onToggleCategoryUi={controller.toggleCategoryUi}
             />
           ))
         )}
@@ -74,6 +90,7 @@ export default function BktModulesPage() {
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">{strings.headline}</p>
       <BktModulesBanner strings={strings} />
+      {controller.visibilityChanged ? <BktModulesVisibilityNotice strings={strings} onReload={reloadDashboard} /> : null}
       {body}
       <Toast toast={toast} />
     </div>

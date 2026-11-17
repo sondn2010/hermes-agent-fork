@@ -1,7 +1,7 @@
-import { Info, PackageOpen } from "lucide-react";
+import { Info, PackageOpen, RefreshCw } from "lucide-react";
 import { Button } from "@nous-research/ui/ui/components/button";
 import type { BktModulesPageStrings } from "@/i18n/types";
-import { BKT_BANNER_VI } from "./bkt-modules-i18n";
+import { BKT_BANNER_VI, BKT_UI_VI } from "./bkt-modules-i18n";
 
 interface StringsProps {
   strings: BktModulesPageStrings;
@@ -20,6 +20,28 @@ export function BktModulesBanner({ strings }: StringsProps) {
           {BKT_BANNER_VI.sessions} {BKT_BANNER_VI.common}
         </p>
       </div>
+    </div>
+  );
+}
+
+interface VisibilityNoticeProps extends StringsProps {
+  onReload: () => void;
+}
+
+/** Shown once a Show UI change is saved: hidden_plugins is read at dashboard load, not live. */
+export function BktModulesVisibilityNotice({ strings, onReload }: VisibilityNoticeProps) {
+  return (
+    <div role="status" className="flex flex-wrap items-center gap-3 border border-border bg-muted/30 px-4 py-2 text-sm">
+      <span className="min-w-0 flex-1">
+        {strings.visibilityRefreshNotice}{" "}
+        <span lang="vi" className="text-xs text-muted-foreground">
+          {BKT_UI_VI.refreshNotice}
+        </span>
+      </span>
+      <Button size="sm" outlined onClick={onReload}>
+        <RefreshCw aria-hidden className="mr-1.5 h-3.5 w-3.5" />
+        {strings.reloadDashboard}
+      </Button>
     </div>
   );
 }

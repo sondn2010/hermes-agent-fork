@@ -1,17 +1,19 @@
 /**
- * Pure derivations for the BKT Modules page: which hub rows are BKT modules, which
- * category each belongs to, how the filter bar narrows them and how the URL query
- * round-trips the filter state. No React, no I/O — everything here is unit-tested.
+ * Pure derivations for the BKT Modules page: which category each row belongs to, how
+ * the filter bar narrows rows and how the URL query round-trips the filter state.
+ * Hub payload -> rows lives in `bkt-modules-hub-rows.ts`. No React, no I/O.
  */
-import type { HubAgentPluginRow } from "@/lib/api";
+import { DIA_COMMON_PLUGIN } from "@/lib/dia-console-api";
 
 export const BKT_PLUGIN_PREFIX = "bkt-";
 export const DIA_PLUGIN_PREFIX = "bkt-dia-";
-/** Shared client module every DIA plugin needs at runtime. */
-export const BKT_DIA_COMMON = "bkt-dia-common";
+/** Shared client module every DIA plugin needs at runtime; its UI is the DIA AI Console. */
+export const BKT_DIA_COMMON = DIA_COMMON_PLUGIN;
 
 const CATEGORY_TAG_PREFIX = "category:";
 export const UNCATEGORIZED = "uncategorized";
+/** Pseudo-category holding the dashboard-only `bkt-*` tabs (no agent plugin behind them). */
+export const DASHBOARD_TABS_CATEGORY = "dashboard-tabs";
 
 /** Display order of the known categories; unknown slugs follow alphabetically, then uncategorized. */
 export const KNOWN_CATEGORY_SLUGS = [
@@ -29,21 +31,38 @@ export type KnownCategorySlug = (typeof KNOWN_CATEGORY_SLUGS)[number];
 export const STATUS_FILTERS = ["all", "enabled", "disabled"] as const;
 export type StatusFilter = (typeof STATUS_FILTERS)[number];
 
+export const UI_FILTERS = ["all", "shown", "hidden"] as const;
+export type UiFilter = (typeof UI_FILTERS)[number];
+
 export interface BktModulesFilters {
   q: string;
   /** Selected category slugs; empty means every category. */
   categories: string[];
+  /** Agent Enabled state; rows without an agent plugin only pass `all`. */
   status: StatusFilter;
+  /** Show UI state; rows without a UI only pass `all`. */
+  ui: UiFilter;
 }
 
-export const DEFAULT_FILTERS: BktModulesFilters = { q: "", categories: [], status: "all" };
+export const DEFAULT_FILTERS: BktModulesFilters = { q: "", categories: [], status: "all", ui: "all" };
+
+/** `agent`: an agent plugin (Enabled switch). `dashboard`: a dashboard-only tab (Show UI switch only). */
+export type BktRowKind = "agent" | "dashboard";
 
 export interface BktModule {
   name: string;
+  kind: BktRowKind;
   description: string;
   version: string;
+  /** Agent plugin enabled; always `false` for `dashboard` rows. */
   enabled: boolean;
   category: string;
+  /** The row owns a UI the user can show or hide (dashboard tab/slot, DIA panel, DIA console). */
+  hasUi: boolean;
+  /** UI listed in `dashboard.hidden_plugins`. */
+  uiHidden: boolean;
+  /** Dashboard manifest label (`Files+`), `""` when the row has none. */
+  uiLabel: string;
 }
 
 export type CategorySwitchState = "on" | "off" | "mixed";
@@ -52,8 +71,13 @@ export interface BktCategoryGroup {
   slug: string;
   /** Modules of this category that pass the current filters, sorted by name. */
   modules: BktModule[];
+  /** Rows backed by an agent plugin (they carry the Enabled switch). */
+  agentCount: number;
   enabledCount: number;
-  state: CategorySwitchState;
+  /** Bulk Enabled state over agent rows; `null` when the group has none. */
+  state: CategorySwitchState | null;
+  /** Bulk Show UI state over rows with a UI; `null` when the group has none. */
+  uiState: CategorySwitchState | null;
 }
 
 export function isKnownCategory(slug: string): slug is KnownCategorySlug {
@@ -85,22 +109,11 @@ export function isBktPluginName(name: string): boolean {
   return name.startsWith(BKT_PLUGIN_PREFIX);
 }
 
-/** The hub rows that are BKT modules, normalized. `tags` comes off the wire, so it is re-checked. */
-export function toBktModules(rows: readonly HubAgentPluginRow[]): BktModule[] {
-  return rows
-    .filter((row) => isBktPluginName(row.name))
-    .map((row) => ({
-      name: row.name,
-      description: row.description ?? "",
-      version: row.version ?? "",
-      enabled: row.runtime_status === "enabled",
-      category: categoryFromTags(Array.isArray(row.tags) ? row.tags : []),
-    }));
-}
-
 export function matchesFilters(module: BktModule, filters: BktModulesFilters): boolean {
-  if (filters.status === "enabled" && !module.enabled) return false;
-  if (filters.status === "disabled" && module.enabled) return false;
+  if (filters.status !== "all" && (module.kind !== "agent" || module.enabled !== (filters.status === "enabled"))) {
+    return false;
+  }
+  if (filters.ui !== "all" && (!module.hasUi || module.uiHidden !== (filters.ui === "hidden"))) return false;
   if (filters.categories.length > 0 && !filters.categories.includes(module.category)) return false;
   const q = filters.q.trim().toLowerCase();
   if (!q) return true;
@@ -108,6 +121,7 @@ export function matchesFilters(module: BktModule, filters: BktModulesFilters): b
 }
 
 function categoryRank(slug: string): number {
+  if (slug === DASHBOARD_TABS_CATEGORY) return KNOWN_CATEGORY_SLUGS.length + 2;
   if (slug === UNCATEGORIZED) return KNOWN_CATEGORY_SLUGS.length + 1;
   const known = (KNOWN_CATEGORY_SLUGS as readonly string[]).indexOf(slug);
   return known === -1 ? KNOWN_CATEGORY_SLUGS.length : known;
@@ -117,10 +131,11 @@ export function compareCategories(a: string, b: string): number {
   return categoryRank(a) - categoryRank(b) || a.localeCompare(b);
 }
 
-export function switchState(modules: readonly BktModule[]): CategorySwitchState {
-  const enabled = modules.filter((m) => m.enabled).length;
-  if (enabled === 0) return "off";
-  return enabled === modules.length ? "on" : "mixed";
+/** Tri-state of a bulk switch over `total` rows of which `on` are on; `null` when there is nothing to switch. */
+export function switchState(on: number, total: number): CategorySwitchState | null {
+  if (total === 0) return null;
+  if (on === 0) return "off";
+  return on === total ? "on" : "mixed";
 }
 
 /** Filtered modules grouped per category; categories with no visible module are dropped. */
@@ -136,11 +151,16 @@ export function groupModules(modules: readonly BktModule[], filters: BktModulesF
     .sort(([a], [b]) => compareCategories(a, b))
     .map(([slug, bucket]) => {
       const sorted = [...bucket].sort((x, y) => x.name.localeCompare(y.name));
+      const agents = sorted.filter((m) => m.kind === "agent");
+      const enabledCount = agents.filter((m) => m.enabled).length;
+      const withUi = sorted.filter((m) => m.hasUi);
       return {
         slug,
         modules: sorted,
-        enabledCount: sorted.filter((m) => m.enabled).length,
-        state: switchState(sorted),
+        agentCount: agents.length,
+        enabledCount,
+        state: switchState(enabledCount, agents.length),
+        uiState: switchState(withUi.filter((m) => !m.uiHidden).length, withUi.length),
       };
     });
 }
@@ -168,9 +188,14 @@ function isStatusFilter(value: string): value is StatusFilter {
   return (STATUS_FILTERS as readonly string[]).includes(value);
 }
 
-/** `?q=&cat=a,b&status=` → filters; malformed values fall back to the defaults. */
+function isUiFilter(value: string): value is UiFilter {
+  return (UI_FILTERS as readonly string[]).includes(value);
+}
+
+/** `?q=&cat=a,b&status=&ui=` → filters; malformed values fall back to the defaults. */
 export function parseFilters(params: URLSearchParams): BktModulesFilters {
   const status = (params.get("status") ?? "").trim().toLowerCase();
+  const ui = (params.get("ui") ?? "").trim().toLowerCase();
   const categories = (params.get("cat") ?? "")
     .split(",")
     .map((c) => c.trim().toLowerCase())
@@ -179,6 +204,7 @@ export function parseFilters(params: URLSearchParams): BktModulesFilters {
     q: params.get("q") ?? "",
     categories: [...new Set(categories)],
     status: isStatusFilter(status) ? status : "all",
+    ui: isUiFilter(ui) ? ui : "all",
   };
 }
 
@@ -188,5 +214,6 @@ export function filtersToParams(filters: BktModulesFilters): URLSearchParams {
   if (filters.q) params.set("q", filters.q);
   if (filters.categories.length > 0) params.set("cat", filters.categories.join(","));
   if (filters.status !== "all") params.set("status", filters.status);
+  if (filters.ui !== "all") params.set("ui", filters.ui);
   return params;
 }

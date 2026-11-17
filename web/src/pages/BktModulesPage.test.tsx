@@ -3,12 +3,13 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { HubAgentPluginRow, PluginsHubResponse } from "@/lib/api";
+import type { HubAgentPluginRow, PluginManifestResponse, PluginsHubResponse } from "@/lib/api";
 
 const apiMocks = vi.hoisted(() => ({
   getPluginsHub: vi.fn(),
   enableAgentPlugin: vi.fn(),
   disableAgentPlugin: vi.fn(),
+  setPluginVisibility: vi.fn(),
 }));
 
 vi.mock("@/lib/api", () => ({ api: apiMocks }));
@@ -36,10 +37,27 @@ function hubRow(name: string, tags: string[], enabled: boolean): HubAgentPluginR
   };
 }
 
-function hub(rows: HubAgentPluginRow[]): PluginsHubResponse {
+type OrphanRow = PluginManifestResponse & { user_hidden?: boolean };
+
+function orphan(name: string, label: string, userHidden = false): OrphanRow {
+  return {
+    name,
+    label,
+    description: `${label} tab`,
+    icon: "Box",
+    version: "1.0.0",
+    tab: { path: `/${name}` },
+    entry: "dist/index.js",
+    has_api: false,
+    source: "bundled",
+    user_hidden: userHidden,
+  };
+}
+
+function hub(rows: HubAgentPluginRow[], orphans: OrphanRow[] = []): PluginsHubResponse {
   return {
     plugins: rows,
-    orphan_dashboard_plugins: [],
+    orphan_dashboard_plugins: orphans,
     providers: { memory_provider: "", memory_options: [], context_engine: "compressor", context_options: [] },
   };
 }
@@ -110,7 +128,14 @@ const moduleSwitch = (name: string) =>
   document.querySelector<HTMLButtonElement>(`button[role="switch"][aria-label="Enable ${name}"]`);
 const categorySwitch = (label: string) =>
   document.querySelector<HTMLButtonElement>(`button[role="checkbox"][aria-label="Enable all visible modules in ${label}"]`);
-const moduleNames = () => [...document.querySelectorAll('button[role="switch"]')].map((el) => el.getAttribute("aria-label"));
+const moduleNames = () =>
+  [...document.querySelectorAll('button[role="switch"][aria-label^="Enable "]')].map((el) => el.getAttribute("aria-label"));
+const showUiSwitch = (name: string) =>
+  document.querySelector<HTMLButtonElement>(`button[role="switch"][aria-label="Show the UI of ${name}"]`);
+const categoryShowUiSwitch = (label: string) =>
+  document.querySelector<HTMLButtonElement>(`button[role="checkbox"][aria-label="Show the UI of all visible rows in ${label}"]`);
+const rowOf = (name: string) =>
+  [...document.querySelectorAll<HTMLLIElement>("li[data-row-kind]")].find((li) => li.textContent?.includes(name)) ?? null;
 
 function click(el: Element | null) {
   if (!el) throw new Error("element not rendered");
@@ -128,6 +153,9 @@ beforeEach(() => {
   apiMocks.getPluginsHub.mockResolvedValue(hub(DEFAULT_ROWS));
   apiMocks.enableAgentPlugin.mockResolvedValue({ ok: true, name: "x" });
   apiMocks.disableAgentPlugin.mockResolvedValue({ ok: true, name: "x" });
+  apiMocks.setPluginVisibility.mockImplementation((name: string, hidden: boolean) =>
+    Promise.resolve({ ok: true, name, hidden }),
+  );
   vi.stubGlobal("matchMedia", () => ({ addEventListener() {}, matches: false, media: "", removeEventListener() {} }));
 });
 
@@ -264,5 +292,149 @@ describe("BktModulesPage", () => {
     await renderPage();
     await waitFor(() => document.body.textContent?.includes("No BKT modules installed") ?? false);
     expect(document.querySelector('button[role="switch"]')).toBeNull();
+  });
+});
+
+const DASHBOARD_TABS: Array<[string, string]> = [
+  ["bkt-author", "Author"],
+  ["bkt-brand", "Brand"],
+  ["bkt-chat", "Chat+"],
+  ["bkt-files", "Files+"],
+  ["bkt-health", "Health"],
+  ["bkt-kanban-workflow", "Kanban"],
+  ["bkt-profiles", "Profiles+"],
+  ["bkt-prompts", "Prompts"],
+];
+
+function hubWithTabs(hiddenTabs: readonly string[] = []): PluginsHubResponse {
+  const orphans = DASHBOARD_TABS.map(([name, label]) => orphan(name, label, hiddenTabs.includes(name)));
+  return hub(
+    [...DEFAULT_ROWS, hubRow("bkt-agent-only", ["bkt", "category:shared"], true)],
+    [...orphans, orphan("example-tab", "Example")],
+  );
+}
+
+describe("BktModulesPage Show UI", () => {
+  beforeEach(() => {
+    apiMocks.getPluginsHub.mockResolvedValue(hubWithTabs(["bkt-health"]));
+  });
+
+  it("lists the dashboard-only tabs in their own group with only a Show UI switch", async () => {
+    await renderPage();
+    await waitFor(() => showUiSwitch("bkt-files") !== null);
+
+    const section = document.querySelector('[data-category="dashboard-tabs"]');
+    expect(section?.textContent).toContain("Dashboard tabs");
+    const rows = [...(section?.querySelectorAll("li[data-row-kind]") ?? [])];
+    expect(rows.map((li) => li.getAttribute("data-row-kind"))).toEqual(Array(8).fill("dashboard"));
+    for (const [name] of DASHBOARD_TABS) {
+      expect(showUiSwitch(name)).not.toBeNull();
+      expect(moduleSwitch(name)).toBeNull();
+    }
+    expect(document.body.textContent).not.toContain("example-tab");
+    expect(showUiSwitch("bkt-health")?.getAttribute("aria-checked")).toBe("false");
+    expect(rowOf("bkt-brand")?.textContent).toContain("Header logo");
+    expect(rowOf("bkt-author")?.textContent).toContain("Credit line");
+    expect(rowOf("bkt-files")?.textContent).toContain("Files+");
+    // The group has only the UI bulk switch.
+    expect(categoryShowUiSwitch("Dashboard tabs")?.getAttribute("aria-checked")).toBe("mixed");
+    expect(categorySwitch("Dashboard tabs")).toBeNull();
+  });
+
+  it("gives DIA rows both switches and agent-only rows only Enabled", async () => {
+    await renderPage();
+    await waitFor(() => moduleSwitch("bkt-agent-only") !== null);
+
+    expect(moduleSwitch("bkt-dia-finance-tax")).not.toBeNull();
+    expect(showUiSwitch("bkt-dia-finance-tax")).not.toBeNull();
+    expect(moduleSwitch("bkt-dia-common")).not.toBeNull();
+    expect(showUiSwitch("bkt-dia-common")).not.toBeNull();
+    expect(rowOf("bkt-dia-common")?.textContent).toContain("DIA AI Console");
+    expect(showUiSwitch("bkt-agent-only")).toBeNull();
+  });
+
+  it("hides and shows a UI through setPluginVisibility, then offers a dashboard reload", async () => {
+    const reload = vi.fn();
+    vi.stubGlobal("location", { ...window.location, reload });
+    await renderPage();
+    await waitFor(() => showUiSwitch("bkt-files") !== null);
+    expect(document.body.textContent).not.toContain("Reload Dashboard");
+
+    await act(async () => click(showUiSwitch("bkt-files")));
+    expect(apiMocks.setPluginVisibility).toHaveBeenCalledWith("bkt-files", true);
+    await act(async () => click(showUiSwitch("bkt-health")));
+    expect(apiMocks.setPluginVisibility).toHaveBeenCalledWith("bkt-health", false);
+
+    await waitFor(() => document.body.textContent?.includes("Reload Dashboard") ?? false);
+    expect(document.querySelector('[role="status"]')?.textContent).toContain("after the dashboard reloads");
+    const button = [...document.querySelectorAll("button")].find((b) => b.textContent?.includes("Reload Dashboard"));
+    await act(async () => click(button ?? null));
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("updates Show UI optimistically, keeps the Enabled switch usable and reconciles once", async () => {
+    await renderPage();
+    await waitFor(() => showUiSwitch("bkt-dia-finance-tax") !== null);
+    const call = deferred<{ ok: boolean; name: string; hidden: boolean }>();
+    apiMocks.setPluginVisibility.mockReturnValueOnce(call.promise);
+    apiMocks.getPluginsHub.mockResolvedValue(
+      hub(
+        DEFAULT_ROWS.map((r) => (r.name === "bkt-dia-finance-tax" ? { ...r, user_hidden: true } : r)),
+        DASHBOARD_TABS.map(([name, label]) => orphan(name, label)),
+      ),
+    );
+
+    await act(async () => click(showUiSwitch("bkt-dia-finance-tax")));
+    expect(showUiSwitch("bkt-dia-finance-tax")?.getAttribute("aria-checked")).toBe("false");
+    expect(showUiSwitch("bkt-dia-finance-tax")?.disabled).toBe(true);
+    // Separate pending sets: the row's Enabled switch stays usable, the bulk switches lock.
+    expect(moduleSwitch("bkt-dia-finance-tax")?.disabled).toBe(false);
+    expect(categorySwitch("Domain lookup")?.disabled).toBe(true);
+    expect(categoryShowUiSwitch("Domain lookup")?.disabled).toBe(true);
+
+    await act(async () => call.resolve({ ok: true, name: "bkt-dia-finance-tax", hidden: true }));
+    await waitFor(() => apiMocks.getPluginsHub.mock.calls.length === 2);
+    await flush(400);
+    expect(apiMocks.getPluginsHub).toHaveBeenCalledTimes(2);
+    expect(showUiSwitch("bkt-dia-finance-tax")?.getAttribute("aria-checked")).toBe("false");
+    expect(showUiSwitch("bkt-dia-finance-tax")?.disabled).toBe(false);
+    expect(categoryShowUiSwitch("Domain lookup")?.disabled).toBe(false);
+  });
+
+  it("rolls back a failed Show UI change with a toast and no reload notice", async () => {
+    await renderPage();
+    await waitFor(() => showUiSwitch("bkt-chat") !== null);
+    apiMocks.setPluginVisibility.mockRejectedValueOnce(new Error("config locked"));
+
+    await act(async () => click(showUiSwitch("bkt-chat")));
+    await waitFor(() => document.body.textContent?.includes("config locked") ?? false);
+    expect(document.body.textContent).toContain("Could not change the UI visibility of bkt-chat: config locked");
+    expect(showUiSwitch("bkt-chat")?.getAttribute("aria-checked")).toBe("true");
+    expect(document.body.textContent).not.toContain("Reload Dashboard");
+  });
+
+  it("shows every UI in a group with the bulk Show UI switch", async () => {
+    await renderPage();
+    await waitFor(() => categoryShowUiSwitch("Dashboard tabs") !== null);
+
+    await act(async () => click(categoryShowUiSwitch("Dashboard tabs")));
+    await waitFor(() => !(categoryShowUiSwitch("Dashboard tabs")?.disabled ?? true));
+    // Only the hidden tab needed a write.
+    expect(apiMocks.setPluginVisibility.mock.calls).toEqual([["bkt-health", false]]);
+    expect(categoryShowUiSwitch("Dashboard tabs")?.getAttribute("aria-checked")).toBe("true");
+    expect(document.body.textContent).toContain("Reload Dashboard");
+  });
+
+  it("filters rows by UI state from the URL", async () => {
+    await renderPage("/bkt-modules?ui=hidden");
+    await waitFor(() => showUiSwitch("bkt-health") !== null);
+    const names = [...document.querySelectorAll('button[role="switch"][aria-label^="Show the UI of "]')].map((el) =>
+      el.getAttribute("aria-label"),
+    );
+    expect(names).toEqual(["Show the UI of bkt-health"]);
+    const uiAll = [...document.querySelectorAll("button[aria-pressed]")].filter((b) => b.textContent === "All")[1];
+    await act(async () => click(uiAll ?? null));
+    expect(document.querySelector('[data-testid="search"]')?.textContent).toBe("");
+    expect(showUiSwitch("bkt-files")).not.toBeNull();
   });
 });
