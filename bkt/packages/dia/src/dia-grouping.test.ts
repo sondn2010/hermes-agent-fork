@@ -1,14 +1,12 @@
-import { describe, expect, it } from "vitest";
-import type { CronJob } from "@/lib/api";
-import type { DiaCategory, DiaModule, DiaRunLogEntry, DiaToolParameters } from "@/lib/dia-console-api";
+import type { CronJob, DiaCategory, DiaModule, DiaRunLogEntry, DiaToolParameters } from "./dia-api";
 import {
   diaMonitoringJobs,
   groupDiaModules,
   hiddenPluginNames,
   latestRunByModule,
   visibleDiaModules,
-} from "./dia-console-grouping";
-import { fieldKind, initialFormValues, missingRequired, toToolArguments } from "./dia-console-form-values";
+} from "./dia-grouping";
+import { fieldKind, initialFormValues, missingRequired, toToolArguments } from "./dia-form-values";
 
 const CATEGORIES: DiaCategory[] = [
   { slug: "domain-lookup", label_vi: "Tra cứu", label_en: "Domain lookup" },
@@ -32,6 +30,14 @@ describe("DIA console grouping", () => {
     );
     expect(groups.map((g) => g.slug)).toEqual(["domain-lookup", "analysis-forecast", "uncategorized", "zeta"]);
     expect(groups[3].category).toBeNull();
+  });
+
+  it("gives the shared category and every empty category no group", () => {
+    const groups = groupDiaModules(
+      [mod("a", "domain-lookup")],
+      [{ slug: "shared", label_vi: "Dùng chung", label_en: "Shared" }, ...CATEGORIES],
+    );
+    expect(groups.map((g) => g.slug)).toEqual(["domain-lookup"]);
   });
 
   it("filters modules the user hid with Show UI", () => {

@@ -9,9 +9,10 @@
 > `bkt-dia-common` plus only the modules you need (`hermes plugins enable <name>` or the
 > dashboard BKT Modules page); every module is opt-in and each profile has its own list. Changes
 > apply to new sessions. The tools fail closed with `{"ok": false, "error", "hint"}` and never
-> fabricate data; each failure names its `stage` (section 5). The dashboard **DIA AI Console**
-> (`/dia`) runs module tools, checks service health and lists recent runs and DIA cron monitors
-> (section 4a); its run log is `<home>/plugin-data/bkt-dia-common/runs.db` (newest 500 rows, a
+> fabricate data; each failure names its `stage` (section 5). The **Trung tâm DIA AI** dashboard tab
+> (`/dia`) is the `bkt-dia-common` dashboard plugin, built from `bkt/packages/dia` into
+> `plugins/bkt_dia_common/dashboard/dist/` (`cd bkt && npm run build`). It runs module tools, checks
+> service health and lists recent runs and DIA cron monitors (section 4a); its run log is `<home>/plugin-data/bkt-dia-common/runs.db` (newest 500 rows, a
 > redacted 200-character question preview, never answers). Hiding a UI with Show UI writes
 > `dashboard.hidden_plugins`. The full use-case coverage matrix is in section 6.
 
@@ -28,9 +29,11 @@ Hướng dẫn cho người dùng cuối: [bkt-dia-modules-user-guide.md](bkt-di
   `skills/<tên>/SKILL.md`. Danh sách công cụ của từng module xem ở `provides_tools` trong
   `plugin.yaml` tương ứng.
 - Trang dashboard BKT Modules: `web/src/pages/BktModulesPage.tsx` và `web/src/pages/bkt-modules/`.
-- Trang dashboard DIA AI Console (`/dia`): `web/src/pages/DiaConsolePage.tsx` và
-  `web/src/pages/dia-console/`; backend là API dashboard của `bkt-dia-common`
-  (`plugins/bkt_dia_common/dashboard/plugin_api.py`, cùng `module_catalog.py` và `run_log.py`).
+- Thẻ dashboard **Trung tâm DIA AI** (`/dia`): dashboard plugin của `bkt-dia-common`. Mã nguồn giao
+  diện ở `bkt/packages/dia/src/`; bản build (`dist/index.js`, `dist/style.css`) nằm trong
+  `plugins/bkt_dia_common/dashboard/dist/` cạnh `manifest.json`. Backend là API dashboard của
+  `bkt-dia-common` (`plugins/bkt_dia_common/dashboard/plugin_api.py`, cùng `module_catalog.py` và
+  `run_log.py`). Không có mã DIA nào trong `web/src`.
 
 Dịch vụ dữ liệu: dịch vụ truy vấn Elasticsearch của DIA (FastAPI), gồm
 `POST /api/v1/query` (body `{"question": "..."}`, trả về `{answer, question, type, sources}`) và
@@ -134,9 +137,21 @@ Kiểm tra plugin trong repo: `hermes plugins validate plugins/<thư-mục>` và
 
 Thẻ sức khỏe trên trang `/dia` gọi cùng `GET .../api/v1/query/test` qua Hermes (mục 4a).
 
-## 4a. DIA AI Console (`/dia`)
+## 4a. Thẻ Trung tâm DIA AI (`/dia`)
 
-Trang `/dia` của dashboard dùng API dashboard của `bkt-dia-common`, gắn tại
+Thẻ **Trung tâm DIA AI** là dashboard plugin của `bkt-dia-common` (manifest
+`plugins/bkt_dia_common/dashboard/manifest.json`, `tab.path: /dia`, vị trí cuối thanh điều hướng).
+Giao diện chỉ có tiếng Việt: thẻ con **Tổng quan** (sức khỏe, lưới module, lần chạy gần đây, giám
+sát) rồi một thẻ con cho mỗi danh mục có module; thẻ con đang mở nằm trong `?tab=`.
+
+- **Build lại sau khi sửa giao diện.** Sửa mã trong `bkt/packages/dia/src/`, rồi chạy
+  `cd bkt && npm run build` (hoặc `node scripts/build.mjs --only dia`) và commit cả hai file trong
+  `plugins/bkt_dia_common/dashboard/dist/`. `npm run check:dist` báo lỗi khi bản build đã commit
+  lệch với mã nguồn. Bản build giới hạn 450 KiB mỗi file.
+- **Ẩn thẻ.** Tắt Show UI của dòng `bkt-dia-common` trên trang BKT Modules rồi tải lại dashboard;
+  thẻ biến mất khỏi thanh điều hướng (cơ chế `dashboard.hidden_plugins` bên dưới).
+
+Thẻ dùng API dashboard của `bkt-dia-common`, gắn tại
 `/api/plugins/bkt-dia-common/`. Mọi route cần token phiên dashboard và chạy theo hồ sơ của
 `?profile=` (cấu hình, khóa và nhật ký chạy đều của hồ sơ đó). Phản hồi không bao giờ chứa
 endpoint hay khóa API. Nguồn: `plugins/bkt_dia_common/dashboard/plugin_api.py`.
@@ -157,8 +172,8 @@ endpoint hay khóa API. Nguồn: `plugins/bkt_dia_common/dashboard/plugin_api.py
   trang đi cùng đường với công cụ của trợ lý (`run_query_tool` trong
   `plugins/bkt_dia_common/tool_factory.py`).
 - **Backend có mặt trừ khi `bkt-dia-common` bị tắt tường minh.** Plugin đi kèm bản cài nên API được
-  gắn trừ khi nó nằm trong `plugins.disabled`. Mục "DIA AI Console" trên thanh điều hướng chỉ hiện
-  khi dashboard nhận được manifest của `bkt-dia-common`; mở thẳng `/dia` vẫn được.
+  gắn trừ khi nó nằm trong `plugins.disabled`. Thẻ "Trung tâm DIA AI" chỉ có khi dashboard nhận được
+  manifest của `bkt-dia-common`; khi plugin bị tắt hoặc ẩn, `/dia` không còn trang nào.
 - **Nhật ký chạy.** Mỗi lần chạy công cụ DIA (nguồn `agent` từ trợ lý, `console` từ trang) ghi một
   dòng vào `<home>/plugin-data/bkt-dia-common/runs.db` của hồ sơ: module, công cụ, nguồn, kết quả,
   `stage`, lỗi, thời gian, và bản xem trước câu hỏi tối đa 200 ký tự đã che thông tin nhạy cảm.
@@ -169,14 +184,14 @@ endpoint hay khóa API. Nguồn: `plugins/bkt_dia_common/dashboard/plugin_api.py
 - **Ẩn giao diện (`dashboard.hidden_plugins`).** Công tắc Show UI trên trang BKT Modules (và nút ẩn
   khỏi thanh bên ở trang Plugins) ghi tên plugin vào `dashboard.hidden_plugins` trong `config.yaml`
   của hồ sơ, qua `POST /api/dashboard/plugins/{name}/visibility`. Với một module `bkt-dia-*`: module
-  không hiện trên trang `/dia`; công cụ của trợ lý **không** đổi (bật/tắt là công tắc Enabled). Với
-  `bkt-dia-common` (dòng "DIA AI Console"): mục `/dia` biến mất khỏi thanh điều hướng; API và công
+  không hiện trong thẻ `/dia` (thẻ đọc cờ `user_hidden` từ `GET /api/dashboard/plugins/hub`); công cụ của trợ lý **không** đổi (bật/tắt là công tắc Enabled). Với
+  `bkt-dia-common` (dòng "DIA AI Console"): thẻ `/dia` biến mất khỏi thanh điều hướng; API và công
   cụ vẫn chạy. Thay đổi có hiệu lực sau khi tải lại dashboard.
 
 ## 5. Xử lý sự cố
 
 Công cụ **fail closed**: trả `{"ok": false, "error", "hint", "stage"}` và không gửi yêu cầu khi
-cấu hình chưa hợp lệ. `stage` cho biết bước kiểm tra nào từ chối; trang `/dia` hiển thị nó trên thẻ
+cấu hình chưa hợp lệ. `stage` cho biết bước kiểm tra nào từ chối; thẻ `/dia` hiển thị nó trên thẻ
 sức khỏe, kết quả chạy và bảng lần chạy gần đây. Skill hướng dẫn trợ lý báo lỗi kèm gợi ý thay vì
 đoán câu trả lời.
 

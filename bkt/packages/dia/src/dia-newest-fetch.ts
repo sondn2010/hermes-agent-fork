@@ -4,6 +4,7 @@
  * slow earlier request can never overwrite fresher data.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { errorMessage } from "@bkt/shared/api";
 
 export interface NewestFetch<T> {
   /** `null` until the first successful load. */
@@ -13,10 +14,6 @@ export interface NewestFetch<T> {
   /** Epoch milliseconds of the last successful load. */
   updatedAt: number | null;
   reload: () => void;
-}
-
-export function errorMessage(error: unknown): string {
-  return error instanceof Error && error.message ? error.message : String(error);
 }
 
 export function useNewestFetch<T>(fetcher: () => Promise<T>): NewestFetch<T> {

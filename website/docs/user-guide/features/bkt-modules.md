@@ -39,8 +39,8 @@ the same setting as the Plugins page's hide-from-sidebar action.
 - The BKT dashboard tabs are grouped under **Dashboard tabs**, which has only Show UI switches.
   **Header logo** (`bkt-brand`) and **Credit line** (`bkt-author`) are labelled by what hiding
   them removes.
-- The **DIA AI Console** row (`bkt-dia-common`) removes `/dia` from the navigation. Hiding a
-  `bkt-dia-*` module removes it from the console.
+- The **DIA AI Console** row (`bkt-dia-common`) removes the **Trung tâm DIA AI** tab (`/dia`) from
+  the navigation. Hiding a `bkt-dia-*` module removes it from the console.
 - Show UI never changes the agent's tools; only the enable switch does.
 - The change applies after the dashboard reloads; the page offers a **Reload Dashboard** button.
 
@@ -58,11 +58,15 @@ Rules that matter:
 
 ## DIA AI Console
 
-The **DIA AI Console** (`/dia`) is the dashboard page for the DIA modules: query service health,
-a form per module tool that runs it and shows the request steps, answer and sources, the recent
-runs from both the agent and the console, and the profile's cron jobs whose skills start with
-`bkt-dia-`. The steps are Hermes-side request steps (validate, build question, query, result),
-not stages of the DIA service's own pipeline. A disabled module cannot be run from the console.
+The DIA AI Console is the **Trung tâm DIA AI** sidebar tab (`/dia`). It is the dashboard plugin of
+`bkt-dia-common`, not a core dashboard page, and its interface is in Vietnamese only. The first
+sub-tab, **Tổng quan** (overview), holds the query service health, a grid of the visible modules,
+the recent runs from both the agent and the console, and the profile's cron jobs whose skills start
+with `bkt-dia-`. Then comes one sub-tab per module category, with a form per module tool that runs
+it and shows the request steps, answer and sources. The open sub-tab is kept in the URL as
+`?tab=<category>`. The steps are Hermes-side request steps (validate, build question, query,
+result), not stages of the DIA service's own pipeline. A disabled module cannot be run from the
+console.
 
 Usage is described in `docs/bkt-dia-modules-user-guide.md` (Vietnamese, with an English summary);
 the backend routes, the run log and troubleshooting by failure `stage` are in

@@ -12,10 +12,12 @@
 > most use cases are *partial*. Each row also has a **Show UI** switch (for plugins that have a
 > dashboard UI, plus a "Dashboard tabs" group for the BKT tabs, the Header logo and the Credit line);
 > hiding a UI takes effect after **Reload Dashboard** and does not change the agent's tools. The
-> **DIA AI Console** (`/dia`) shows service status, runs a module tool from a form and shows its
-> steps (Hermes-side request steps, not DIA pipeline steps), answer and sources, lists recent runs
-> (manual refresh) and monitors cron jobs whose skills start with `bkt-dia-`. Hiding the "DIA AI
-> Console" row removes `/dia` from the navigation. Operators: see
+> **Trung tâm DIA AI** tab (`/dia`, the `bkt-dia-common` dashboard plugin, Vietnamese UI) opens on
+> **Tổng quan** (service status, module grid, recent runs with manual refresh, and cron jobs whose
+> skills start with `bkt-dia-`), followed by one sub-tab per module category where a module tool runs
+> from a form and shows its steps (Hermes-side request steps, not DIA pipeline steps), answer and
+> sources. The open sub-tab is kept in the URL (`?tab=`). Hiding the `bkt-dia-common` row removes
+> the tab from the navigation. Operators: see
 > [bkt-dia-modules-admin-setup.md](bkt-dia-modules-admin-setup.md) for setup and the full use-case
 > coverage matrix. English feature page:
 > [website/docs/user-guide/features/bkt-modules.md](../website/docs/user-guide/features/bkt-modules.md).
@@ -32,9 +34,9 @@ vụ, khóa API, kiểm tra kết nối) nằm trong
   module cung cấp 1–2 công cụ chỉ đọc và một kỹ năng (skill) hướng dẫn trợ lý cách trả lời.
 - **Module dùng chung `bkt-dia-common`**: chứa kết nối tới dịch vụ dữ liệu DIA. Bản thân nó không
   có công cụ nào, nhưng mọi module DIA đều cần nó được bật.
-- **Trang DIA AI Console** (`/dia`, mục "DIA AI Console" ngay sau BKT Modules): xem trạng thái dịch
-  vụ, chạy thử từng công cụ DIA bằng biểu mẫu, xem các lần chạy gần đây và các tác vụ giám sát
-  (mục 2a).
+- **Thẻ Trung tâm DIA AI** (`/dia`, ở cuối thanh điều hướng): xem trạng thái dịch vụ, chạy thử từng
+  công cụ DIA bằng biểu mẫu, xem các lần chạy gần đây và các tác vụ giám sát (mục 2a). Thẻ này là
+  giao diện (dashboard plugin) của module `bkt-dia-common`, toàn bộ bằng tiếng Việt.
 
 Các module chỉ **đọc** dữ liệu. Không module nào tạo, sửa hay xóa dữ liệu trong hệ thống DIA.
 
@@ -75,9 +77,9 @@ Ngoài công tắc bật/tắt (Enabled), mỗi dòng có giao diện trên bả
 - Các thẻ BKT trên bảng điều khiển nằm trong nhóm **Dashboard tabs** ("Thẻ trên bảng điều khiển").
   Nhóm này chỉ có công tắc Show UI. Dòng **Header logo** (`bkt-brand`) ẩn logo đầu trang; dòng
   **Credit line** (`bkt-author`) ẩn dòng ghi công dưới mỗi trang cùng thẻ About BKT.
-- Dòng **DIA AI Console** (`bkt-dia-common`): tắt Show UI thì mục `/dia` biến mất khỏi thanh điều
-  hướng. Module `bkt-dia-common` vẫn bật và công cụ DIA vẫn chạy.
-- Một module `bkt-dia-*` tắt Show UI thì không hiện trên trang DIA AI Console. Trợ lý vẫn dùng công
+- Dòng **DIA AI Console** (`bkt-dia-common`): tắt Show UI thì thẻ **Trung tâm DIA AI** (`/dia`)
+  biến mất khỏi thanh điều hướng. Module `bkt-dia-common` vẫn bật và công cụ DIA vẫn chạy.
+- Một module `bkt-dia-*` tắt Show UI thì không hiện trong thẻ Trung tâm DIA AI. Trợ lý vẫn dùng công
   cụ của nó nếu module đang bật.
 - **Show UI không thay đổi công cụ của trợ lý**; chỉ công tắc Enabled làm điều đó.
 - Thay đổi Show UI được lưu theo hồ sơ và **có hiệu lực sau khi tải lại bảng điều khiển**: trang
@@ -110,15 +112,18 @@ Trên trang, các danh mục hiển thị song ngữ:
 - **Mỗi hồ sơ (profile) Hermes có danh sách bật/tắt riêng.** Bật ở hồ sơ này không ảnh hưởng hồ sơ
   khác.
 
-## 2a. Sử dụng trang DIA AI Console (`/dia`)
+## 2a. Sử dụng thẻ Trung tâm DIA AI (`/dia`)
 
-Mở mục **DIA AI Console** trên thanh điều hướng, hoặc đường dẫn `/dia`. Mục này chỉ hiện khi
-`bkt-dia-common` có trên bản cài và chưa bị ẩn bằng Show UI. Trang dùng hồ sơ đang chọn trên bảng
-điều khiển. Các thẻ phía trên: **Trạng thái**, một thẻ cho mỗi danh mục module, **Lần chạy gần
-đây**, **Giám sát**. Module bị ẩn bằng Show UI không hiện; nếu mọi module đều ẩn hoặc chưa có,
-trang gợi ý mở BKT Modules.
+Mở thẻ **Trung tâm DIA AI** ở cuối thanh điều hướng, hoặc đường dẫn `/dia`. Thẻ chỉ hiện khi
+`bkt-dia-common` có trên bản cài và chưa bị ẩn bằng Show UI. Thẻ dùng hồ sơ đang chọn trên bảng
+điều khiển; đổi hồ sơ thì dữ liệu (lần chạy, tác vụ giám sát) đổi theo. Các thẻ con phía trên:
+**Tổng quan**, rồi một thẻ con cho mỗi danh mục có module (danh mục không có module nào, như
+`shared`, không có thẻ con). Thẻ con đang mở được giữ trên đường dẫn (`/dia?tab=<danh-mục>`), nên
+tải lại trang vẫn mở đúng thẻ con; giá trị không hợp lệ thì quay về Tổng quan. Module bị ẩn bằng
+Show UI không hiện; nếu mọi module đều ẩn hoặc chưa có, trang gợi ý mở BKT Modules.
 
-**Trạng thái.** Thẻ sức khỏe dịch vụ truy vấn cho biết dịch vụ có khỏe không, số tài liệu và độ
+**Tổng quan.** Gồm bốn phần: thẻ sức khỏe dịch vụ, lưới module, **Lần chạy gần đây** và **Giám
+sát**. Thẻ sức khỏe dịch vụ truy vấn cho biết dịch vụ có khỏe không, số tài liệu và độ
 trễ; khi lỗi, thẻ cho biết lỗi ở bước nào (`stage`) kèm gợi ý. Trang chỉ cho biết endpoint đã được
 cấu hình hay chưa, không hiển thị địa chỉ. Bên dưới là lưới các module: danh mục, đang bật hay tắt,
 và kết quả lần chạy gần nhất.
@@ -126,10 +131,9 @@ và kết quả lần chạy gần nhất.
 **Chạy một module.** Mở thẻ danh mục, chọn module. Mỗi công cụ có một biểu mẫu dựng từ tham số của
 nó; trường bắt buộc được đánh dấu và phải điền trước khi chạy. Module đang tắt không có biểu mẫu mà
 có liên kết tới trang BKT Modules để bật; dù gọi trực tiếp, Hermes cũng từ chối chạy module tắt.
-Trong khi chạy, nút Run bị khóa và bước truy vấn hiện thời gian đã trôi qua.
+Trong khi chạy, nút **Chạy** bị khóa và bước truy vấn hiện thời gian đã trôi qua.
 
-**Đọc các bước.** Kết quả có bốn bước: kiểm tra tham số (Validate), tạo câu hỏi (Build question),
-gửi truy vấn (Query), đọc kết quả (Result), mỗi bước có trạng thái và thời gian. Đây là **các bước
+**Đọc các bước.** Kết quả có bốn bước: Kiểm tra tham số, Tạo câu hỏi, Truy vấn, Kết quả; mỗi bước có trạng thái và thời gian. Đây là **các bước
 xử lý yêu cầu phía Hermes**, **không phải** các bước trong pipeline của hệ thống DIA: Hermes không
 thấy dịch vụ DIA xử lý bên trong thế nào. Khi lỗi, trang cho biết bước lỗi, `stage`, nội dung lỗi
 và gợi ý; các bước sau được đánh dấu bỏ qua.
@@ -137,14 +141,14 @@ và gợi ý; các bước sau được đánh dấu bỏ qua.
 **Câu trả lời và nguồn.** Trang hiện câu hỏi đã gửi, câu trả lời, loại câu trả lời và danh sách
 nguồn (năm nguồn đầu, bấm để xem thêm).
 
-**Lần chạy gần đây.** Bảng các lần chạy công cụ DIA của hồ sơ, cả từ trợ lý (Agent) lẫn từ trang
-này (Console): thời gian, module, công cụ, nguồn, kết quả, thời lượng. Bảng **không tự cập nhật**:
-bấm Refresh để tải lại. Nhật ký chỉ lưu bản xem trước ngắn của câu hỏi, không lưu câu trả lời.
+**Lần chạy gần đây** (trong Tổng quan). Bảng các lần chạy công cụ DIA của hồ sơ, cả từ trợ lý
+(Agent) lẫn từ thẻ này (Bảng điều khiển): thời gian, module, công cụ, nơi chạy, kết quả, thời
+lượng. Bảng **không tự cập nhật**: bấm **Làm mới** để tải lại. Nhật ký chỉ lưu bản xem trước ngắn của câu hỏi, không lưu câu trả lời.
 
-**Giám sát.** Liệt kê các tác vụ cron của hồ sơ có skill bắt đầu bằng `bkt-dia-` (ví dụ
+**Giám sát** (trong Tổng quan). Liệt kê các tác vụ cron của hồ sơ có skill bắt đầu bằng `bkt-dia-` (ví dụ
 `bkt-dia-risk-monitor`): lịch, đang chạy hay tạm dừng, trạng thái và thời điểm lần chạy cuối.
 Liên kết xem kết quả mở phiên hội thoại của lần chạy đó (`/chat?resume=<id>`), hoặc trang Cron
-(`/cron`) khi lần chạy chỉ có đầu ra script. Bấm Refresh để tải lại. Chưa có tác vụ nào thì tạo bằng
+(`/cron`) khi lần chạy chỉ có đầu ra script. Bấm **Làm mới** để tải lại. Chưa có tác vụ nào thì tạo bằng
 `hermes cron create` với skill DIA (hỏi quản trị viên).
 
 ## 3. Các module theo danh mục
@@ -244,5 +248,5 @@ tên, nêu năm, tỉnh/thành, lĩnh vực.
 
 **Câu hỏi quá rộng, trả lời chậm.** Thu hẹp câu hỏi (một năm, một tỉnh, một lĩnh vực).
 
-**Không thấy mục DIA AI Console, hoặc một thẻ/module biến mất sau khi tắt Show UI.** Bật lại Show UI
+**Không thấy thẻ Trung tâm DIA AI, hoặc một thẻ con/module biến mất sau khi tắt Show UI.** Bật lại Show UI
 cho dòng tương ứng trên trang BKT Modules (lọc UI: Đang ẩn) rồi bấm Reload Dashboard.

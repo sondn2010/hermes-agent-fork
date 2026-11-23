@@ -4,21 +4,27 @@
  * Catalog, health and runs load in parallel; each is newest-fetch-wins.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { api } from "@/lib/api";
+import { errorMessage } from "@bkt/shared/api";
 import {
   getDiaHealth,
   getDiaModules,
   getDiaRuns,
+  getHubPlugins,
   runDiaTool,
-  type DiaHealthResponse,
-  type DiaModule,
-  type DiaModulesResponse,
-  type DiaRunLogEntry,
-  type DiaRunResponse,
-  type DiaToolArguments,
-} from "@/lib/dia-console-api";
-import { hiddenPluginNames, visibleDiaModules } from "./dia-console-grouping";
-import { errorMessage, useNewestFetch, type NewestFetch } from "./dia-console-newest-fetch";
+} from "./dia-api";
+import type {
+  DiaHealthResponse,
+  DiaModule,
+  DiaModulesResponse,
+  DiaRunLogEntry,
+  DiaRunResponse,
+  DiaToolArguments,
+} from "./dia-api";
+import { hiddenPluginNames, visibleDiaModules } from "./dia-grouping";
+import { loadMonitors } from "./dia-monitors";
+import type { MonitorRow } from "./dia-monitors";
+import { useNewestFetch } from "./dia-newest-fetch";
+import type { NewestFetch } from "./dia-newest-fetch";
 
 export interface DiaCatalog {
   modules: DiaModulesResponse;
@@ -40,8 +46,9 @@ export interface DiaConsoleController {
   /** Modules whose UI is not hidden, in catalog order; `[]` until the catalog loads. */
   visibleModules: DiaModule[];
   health: NewestFetch<DiaHealthResponse>;
-  refreshHealth: () => void;
   runs: NewestFetch<DiaRunLogEntry[]>;
+  /** Loaded once per page, not on every return to the overview: it costs 1 + N cron requests. */
+  monitors: NewestFetch<MonitorRow[]>;
   results: Readonly<Record<string, DiaToolRunState>>;
   run: (module: string, tool: string, args: DiaToolArguments) => Promise<void>;
 }
@@ -53,18 +60,17 @@ export function toolRunKey(module: string, tool: string): string {
 
 // A hidden module must never render, so the catalog only loads with the hub's flags.
 async function loadCatalog(): Promise<DiaCatalog> {
-  const [modules, hub] = await Promise.all([getDiaModules(), api.getPluginsHub()]);
-  return { modules, hidden: hiddenPluginNames(hub.plugins ?? []) };
+  const [modules, hub] = await Promise.all([getDiaModules(), getHubPlugins()]);
+  return { modules, hidden: hiddenPluginNames(hub) };
 }
 
-async function loadRuns(): Promise<DiaRunLogEntry[]> {
-  return (await getDiaRuns()).runs ?? [];
-}
+const loadRuns = () => getDiaRuns();
 
 export function useDiaConsole(): DiaConsoleController {
   const catalog = useNewestFetch(loadCatalog);
   const health = useNewestFetch(getDiaHealth);
   const runs = useNewestFetch(loadRuns);
+  const monitors = useNewestFetch(loadMonitors);
   const [results, setResults] = useState<Record<string, DiaToolRunState>>({});
   const mounted = useRef(true);
 
@@ -97,5 +103,5 @@ export function useDiaConsole(): DiaConsoleController {
     }
   }, []);
 
-  return { catalog, visibleModules, health, refreshHealth: health.reload, runs, results, run };
+  return { catalog, visibleModules, health, runs, monitors, results, run };
 }

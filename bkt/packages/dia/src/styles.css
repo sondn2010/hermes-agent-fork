@@ -1,0 +1,58 @@
+/* DIA AI Console: layout and the spinner/timeline pieces the core console took from host components. */
+.bkt-dia-title { margin: 0; font-size: 1.25rem; font-weight: 600; }
+.bkt-dia-section { margin: 0; font-size: 0.95rem; font-weight: 600; }
+.bkt-dia-stack { gap: 1rem; }
+.bkt-dia-scroll { overflow-x: auto; max-width: 100%; }
+.bkt-dia-link { color: var(--bkt-accent); text-decoration: underline; font-size: 0.9em; }
+.bkt-dia-danger { color: var(--bkt-danger); }
+.bkt-dia-warn { color: var(--color-warning, #f59e0b); font-size: 0.9em; }
+.bkt-dia-wrap { overflow-wrap: anywhere; margin: 0; }
+.bkt-dia-block { display: block; }
+.bkt-dia-nowrap { white-space: nowrap; }
+.bkt-dia-num { text-align: right; }
+.bkt-dia-required { margin-left: 0.25rem; }
+.bkt-dia-type { margin-left: 0.5rem; }
+.bkt-dia-loading { display: flex; justify-content: center; padding: 2.5rem 0; }
+.bkt-dia-empty-line { text-align: center; padding: 1.5rem 0; }
+
+.bkt-dia-empty { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center;
+  border: 1px dashed var(--bkt-border); padding: 2rem 1.5rem; }
+.bkt-dia-empty p { margin: 0; }
+.bkt-dia-failure { border: 1px solid color-mix(in srgb, var(--bkt-danger) 50%, transparent); padding: 0.5rem 0.75rem; }
+.bkt-dia-failure p { margin: 0; }
+
+.bkt-dia-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin: 0; }
+.bkt-dia-fact { gap: 0.125rem; }
+.bkt-dia-fact dd { margin: 0; }
+
+.bkt-dia-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); }
+.bkt-dia-tile { display: flex; flex-direction: column; gap: 0.25rem; border: 1px solid var(--bkt-border); padding: 0.5rem 0.75rem; }
+.bkt-dia-tile-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+
+.bkt-dia-module-title { margin: 0; font-size: 1rem; font-weight: 600; }
+.bkt-dia-tool { border-top: 1px solid var(--bkt-border); padding-top: 0.75rem; }
+.bkt-dia-tool-name { margin: 0; font-size: 0.9rem; }
+.bkt-dia-tool p { margin: 0; }
+.bkt-dia-field { display: grid; gap: 0.25rem; }
+.bkt-dia-result { background: color-mix(in srgb, var(--bkt-border) 20%, transparent); padding: 0.5rem 0.75rem; }
+.bkt-dia-result p { margin: 0; }
+.bkt-dia-source { border-left: 2px solid var(--bkt-border); padding-left: 0.5rem; font-size: 0.85em; }
+
+.bkt-dia-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.8em; }
+.bkt-dia-step { display: inline-flex; align-items: center; gap: 0.25rem; }
+.bkt-dia-step-ok > :first-child { color: var(--bkt-tertiary); }
+.bkt-dia-step-error > :first-child { color: var(--bkt-danger); }
+.bkt-dia-step-skipped > :first-child, .bkt-dia-step-pending > :first-child { color: var(--bkt-muted); }
+
+.bkt-dia-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
+.bkt-dia-table th { font-size: 0.75rem; font-weight: 500; color: var(--bkt-muted); padding: 0.25rem 0.5rem; }
+.bkt-dia-table td { border-top: 1px solid var(--bkt-border); padding: 0.25rem 0.5rem; vertical-align: top; }
+
+.bkt-dia-icon { width: 0.875rem; height: 0.875rem; vertical-align: -0.125rem; }
+.bkt-dia-spinner { display: inline-block; width: 0.875rem; height: 0.875rem; border-radius: 50%;
+  border: 2px solid var(--bkt-border); border-top-color: var(--bkt-accent); animation: bkt-dia-rotate 0.8s linear infinite; }
+.bkt-dia-spin { animation: bkt-dia-rotate 0.8s linear infinite; }
+@keyframes bkt-dia-rotate { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .bkt-dia-spinner, .bkt-dia-spin { animation-duration: 2.4s; } }
+@media (max-width: 640px) { .bkt-dia-facts { grid-template-columns: minmax(0, 1fr); } }

@@ -1,31 +1,25 @@
-import { useId, useState, type FormEvent } from "react";
-import { Play } from "lucide-react";
-import { Button } from "@nous-research/ui/ui/components/button";
-import { Label } from "@nous-research/ui/ui/components/label";
-import type { DiaConsolePageStrings } from "@/i18n/types";
-import type { DiaTool, DiaToolArguments } from "@/lib/dia-console-api";
-import { DiaFieldInput } from "./dia-console-field-inputs";
-import {
-  fieldKind,
-  initialFormValues,
-  missingRequired,
-  schemaProperties,
-  toToolArguments,
-  type DiaFormValues,
-} from "./dia-console-form-values";
-import { DiaRunResult } from "./dia-console-run-result";
-import type { DiaToolRunState } from "./dia-console-store";
+import { useId, useState } from "react";
+import type { FormEvent } from "react";
+import { ui } from "@bkt/shared/sdk";
+import type { DiaTool, DiaToolArguments } from "./dia-api";
+import { fieldKind, initialFormValues, missingRequired, schemaProperties, toToolArguments } from "./dia-form-values";
+import type { DiaFormValues } from "./dia-form-values";
+import { VI } from "./dia-strings";
+import type { DiaToolRunState } from "./dia-store";
+import { FieldInput } from "./field-inputs";
+import { RunResult } from "./run-result";
 
-export interface DiaToolFormProps {
+export interface ToolFormProps {
   module: string;
   tool: DiaTool;
   result: DiaToolRunState | undefined;
-  strings: DiaConsolePageStrings;
   onRun: (module: string, tool: string, args: DiaToolArguments) => void;
 }
 
 /** Schema-generated form for one tool, with its latest run result underneath. */
-export function DiaToolForm({ module, tool, result, strings, onRun }: DiaToolFormProps) {
+export function ToolForm({ module, tool, result, onRun }: ToolFormProps) {
+  const Button = ui("Button");
+  const Label = ui("Label");
   const formId = useId();
   const [values, setValues] = useState<DiaFormValues>(() => initialFormValues(tool.parameters));
   const [missing, setMissing] = useState<ReadonlySet<string>>(() => new Set());
@@ -47,12 +41,12 @@ export function DiaToolForm({ module, tool, result, strings, onRun }: DiaToolFor
   };
 
   return (
-    <section className="flex flex-col gap-3 border-t border-border pt-3" data-tool={tool.name}>
+    <section className="bkt-dia-tool bkt-col" data-tool={tool.name}>
       <div>
-        <h4 className="font-mono text-sm">{tool.name}</h4>
-        {tool.description ? <p className="text-xs text-muted-foreground">{tool.description}</p> : null}
+        <h4 className="bkt-mono bkt-dia-tool-name">{tool.name}</h4>
+        {tool.description ? <p className="bkt-muted">{tool.description}</p> : null}
       </div>
-      <form noValidate onSubmit={submit} className="flex flex-col gap-3" aria-label={tool.name}>
+      <form noValidate onSubmit={submit} className="bkt-col" aria-label={tool.name}>
         {schemaProperties(tool.parameters).map(([name, property]) => {
           const id = `${formId}-${name}`;
           const errorId = `${id}-error`;
@@ -60,21 +54,21 @@ export function DiaToolForm({ module, tool, result, strings, onRun }: DiaToolFor
           const invalid = missing.has(name);
           const describedBy = [property.description ? hintId : null, invalid ? errorId : null].filter(Boolean).join(" ");
           return (
-            <div key={name} className="grid gap-1" data-field={name}>
-              <Label htmlFor={id} className="text-sm">
+            <div key={name} className="bkt-dia-field" data-field={name}>
+              <Label htmlFor={id}>
                 {name}
                 {required.has(name) ? (
-                  <span className="ml-1 text-destructive" title={strings.form.required}>
+                  <span className="bkt-dia-danger bkt-dia-required" title={VI.form.required}>
                     *
                   </span>
                 ) : null}
               </Label>
               {property.description ? (
-                <span id={hintId} className="text-xs text-muted-foreground">
+                <span id={hintId} className="bkt-muted">
                   {property.description}
                 </span>
               ) : null}
-              <DiaFieldInput
+              <FieldInput
                 kind={fieldKind(property)}
                 id={id}
                 label={name}
@@ -82,12 +76,12 @@ export function DiaToolForm({ module, tool, result, strings, onRun }: DiaToolFor
                 value={values[name] ?? ""}
                 invalid={invalid}
                 describedBy={describedBy || undefined}
-                selectPlaceholder={strings.form.selectPlaceholder}
+                selectPlaceholder={VI.form.selectPlaceholder}
                 onChange={(value) => update(name, value)}
               />
               {invalid ? (
-                <span id={errorId} role="alert" className="text-xs text-destructive">
-                  {strings.form.requiredMissing(name)}
+                <span id={errorId} role="alert" className="bkt-error">
+                  {VI.form.requiredMissing(name)}
                 </span>
               ) : null}
             </div>
@@ -95,12 +89,11 @@ export function DiaToolForm({ module, tool, result, strings, onRun }: DiaToolFor
         })}
         <div>
           <Button type="submit" size="sm" disabled={pending}>
-            <Play aria-hidden className="mr-1 h-3.5 w-3.5" />
-            {pending ? strings.buttons.running : strings.buttons.run}
+            {pending ? VI.buttons.running : `▶ ${VI.buttons.run}`}
           </Button>
         </div>
       </form>
-      {result ? <DiaRunResult result={result} strings={strings} /> : null}
+      {result ? <RunResult result={result} /> : null}
     </section>
   );
 }

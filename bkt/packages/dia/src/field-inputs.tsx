@@ -1,12 +1,10 @@
 /** Schema field input: one component per field kind, chosen from a table, never a type ladder. */
 import type { ComponentType } from "react";
-import { Input } from "@nous-research/ui/ui/components/input";
-import { Select, SelectOption } from "@nous-research/ui/ui/components/select";
-import { Switch } from "@nous-research/ui/ui/components/switch";
-import type { DiaSchemaProperty } from "@/lib/dia-console-api";
-import type { DiaFieldKind } from "./dia-console-form-values";
+import { ui } from "@bkt/shared/sdk";
+import type { DiaSchemaProperty } from "./dia-api";
+import type { DiaFieldKind } from "./dia-form-values";
 
-export interface DiaFieldInputProps {
+export interface FieldInputProps {
   id: string;
   label: string;
   property: DiaSchemaProperty;
@@ -17,28 +15,26 @@ export interface DiaFieldInputProps {
   onChange: (value: string | boolean) => void;
 }
 
-const TEXTAREA_CLASS =
-  "flex min-h-[80px] w-full border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
-
 const asText = (value: string | boolean) => (typeof value === "string" ? value : "");
 
-function TextField({ id, value, invalid, describedBy, onChange }: DiaFieldInputProps) {
+function TextField({ id, value, invalid, describedBy, onChange }: FieldInputProps) {
+  const Input = ui("Input");
   return (
     <Input
       id={id}
       value={asText(value)}
       aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e: { target: HTMLInputElement }) => onChange(e.target.value)}
     />
   );
 }
 
-function TextareaField({ id, value, invalid, describedBy, onChange }: DiaFieldInputProps) {
+function TextareaField({ id, value, invalid, describedBy, onChange }: FieldInputProps) {
   return (
     <textarea
       id={id}
-      className={TEXTAREA_CLASS}
+      className="bkt-textarea"
       value={asText(value)}
       aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
@@ -47,7 +43,8 @@ function TextareaField({ id, value, invalid, describedBy, onChange }: DiaFieldIn
   );
 }
 
-function NumberField({ id, property, value, invalid, describedBy, onChange }: DiaFieldInputProps) {
+function NumberField({ id, property, value, invalid, describedBy, onChange }: FieldInputProps) {
+  const Input = ui("Input");
   return (
     <Input
       id={id}
@@ -59,26 +56,29 @@ function NumberField({ id, property, value, invalid, describedBy, onChange }: Di
       value={asText(value)}
       aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e: { target: HTMLInputElement }) => onChange(e.target.value)}
     />
   );
 }
 
-function BooleanField({ id, label, value, describedBy, onChange }: DiaFieldInputProps) {
+function BooleanField({ id, label, value, describedBy, onChange }: FieldInputProps) {
+  const Checkbox = ui("Checkbox");
   return (
-    <Switch
+    <Checkbox
       id={id}
       checked={value === true}
       aria-label={label}
       aria-describedby={describedBy}
-      onCheckedChange={(next) => onChange(next)}
+      onCheckedChange={(next: boolean | "indeterminate") => onChange(next === true)}
     />
   );
 }
 
-function EnumField({ id, property, value, selectPlaceholder, onChange }: DiaFieldInputProps) {
+function EnumField({ id, property, value, selectPlaceholder, onChange }: FieldInputProps) {
+  const Select = ui("Select");
+  const SelectOption = ui("SelectOption");
   return (
-    <Select id={id} value={asText(value)} onValueChange={(next) => onChange(next)}>
+    <Select id={id} value={asText(value)} onValueChange={(next: string) => onChange(next)}>
       <SelectOption value="">{selectPlaceholder}</SelectOption>
       {(property.enum ?? []).map((option) => (
         <SelectOption key={String(option)} value={String(option)}>
@@ -89,7 +89,7 @@ function EnumField({ id, property, value, selectPlaceholder, onChange }: DiaFiel
   );
 }
 
-const FIELD_INPUTS: Record<DiaFieldKind, ComponentType<DiaFieldInputProps>> = {
+const FIELD_INPUTS: Record<DiaFieldKind, ComponentType<FieldInputProps>> = {
   text: TextField,
   textarea: TextareaField,
   number: NumberField,
@@ -97,7 +97,7 @@ const FIELD_INPUTS: Record<DiaFieldKind, ComponentType<DiaFieldInputProps>> = {
   enum: EnumField,
 };
 
-export function DiaFieldInput({ kind, ...props }: DiaFieldInputProps & { kind: DiaFieldKind }) {
+export function FieldInput({ kind, ...props }: FieldInputProps & { kind: DiaFieldKind }) {
   const Field = FIELD_INPUTS[kind];
   return <Field {...props} />;
 }

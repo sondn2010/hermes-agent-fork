@@ -3,12 +3,10 @@
  * the filter bar narrows rows and how the URL query round-trips the filter state.
  * Hub payload -> rows lives in `bkt-modules-hub-rows.ts`. No React, no I/O.
  */
-import { DIA_COMMON_PLUGIN } from "@/lib/dia-console-api";
-
 export const BKT_PLUGIN_PREFIX = "bkt-";
 export const DIA_PLUGIN_PREFIX = "bkt-dia-";
-/** Shared client module every DIA plugin needs at runtime; its UI is the DIA AI Console. */
-export const BKT_DIA_COMMON = DIA_COMMON_PLUGIN;
+/** Shared client module every DIA plugin needs at runtime; its dashboard tab is the DIA AI Console. */
+export const BKT_DIA_COMMON = "bkt-dia-common";
 
 const CATEGORY_TAG_PREFIX = "category:";
 export const UNCATEGORIZED = "uncategorized";

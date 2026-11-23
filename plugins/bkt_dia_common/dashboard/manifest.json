@@ -1,13 +1,14 @@
 {
   "name": "bkt-dia-common",
-  "label": "DIA AI Console",
-  "description": "Backend for the /dia console page.",
+  "label": "Trung tâm DIA AI",
+  "description": "Chạy các module DIA, kiểm tra dịch vụ truy vấn và theo dõi các lần chạy.",
   "icon": "Bot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "tab": {
     "path": "/dia",
-    "hidden": true
+    "position": "end"
   },
   "entry": "dist/index.js",
+  "css": "dist/style.css",
   "api": "plugin_api.py"
 }

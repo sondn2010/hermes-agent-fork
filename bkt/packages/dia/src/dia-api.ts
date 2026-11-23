@@ -1,28 +1,22 @@
 /**
- * Client for the DIA AI Console: the bkt-dia-common plugin API plus the cron run
- * history the console's monitoring view needs.
+ * Client for the DIA AI Console: the bkt-dia-common plugin API, the hub's Show UI flags and
+ * the cron run history the monitoring view needs.
  *
- * The plugin routes live under `/api/plugins/`, which `fetchJSON` already scopes to
- * the selected management profile, so they never add `?profile=` themselves. Cron
- * routes are not auto-scoped and name the profile explicitly, as `api.getCronJobs` does.
+ * Every request names the bundle's profile explicitly (`?profile=`), as the other bkt
+ * packages do. The host only auto-scopes when no `profile=` is present, so an explicit one
+ * always wins; with an unscoped bundle the plugin and hub routes fall back to the host's
+ * automatic management-profile suffix, as the core console relied on.
  */
-import { fetchJSON, getManagementProfile } from "@/lib/api";
-import type { PluginManifest } from "@/plugins/types";
+import { bktFetch, jsonInit } from "@bkt/shared/api";
+import { bundleProfile } from "@bkt/shared/sdk";
 
-/** Plugin that owns the console API; its dashboard manifest gates the `/dia` nav entry. */
+/** Plugin that owns the console API and this bundle. */
 export const DIA_COMMON_PLUGIN = "bkt-dia-common";
 
 const PLUGIN_BASE = `/api/plugins/${DIA_COMMON_PLUGIN}`;
 
 /** Where a failed run or health probe stopped. */
-export type DiaStage =
-  | "validate"
-  | "disabled"
-  | "config"
-  | "url_safety"
-  | "network"
-  | "http"
-  | "response";
+export type DiaStage = "validate" | "disabled" | "config" | "url_safety" | "network" | "http" | "response";
 
 /** Run steps, always reported in this order. */
 export const DIA_STEP_KEYS = ["validate", "build_question", "query", "result"] as const;
@@ -109,12 +103,6 @@ export type DiaHealthResponse = DiaHealthOk | DiaHealthError;
 /** Tool arguments: the values the schema-generated form collected. */
 export type DiaToolArguments = Record<string, string | number | boolean>;
 
-export interface DiaRunRequest {
-  module: string;
-  tool: string;
-  arguments: DiaToolArguments;
-}
-
 /** One source record from the DIA service; its keys vary by module. */
 export type DiaSource = Record<string, unknown>;
 
@@ -146,8 +134,23 @@ export interface DiaRunLogEntry {
   question_preview: string | null;
 }
 
-export interface DiaRunsResponse {
-  runs: DiaRunLogEntry[];
+/** The fields of a hub plugin row the console reads. */
+export interface HubPluginRow {
+  name: string;
+  user_hidden: boolean;
+}
+
+/** The fields of a cron job the monitoring view reads. */
+export interface CronJob {
+  id: string;
+  profile?: string | null;
+  name?: string | null;
+  skills?: string[] | null;
+  schedule?: { kind?: string; expr?: string; display?: string };
+  schedule_display?: string | null;
+  enabled: boolean;
+  last_run_at?: string | null;
+  last_status?: string | null;
 }
 
 /** One cron execution row (agent session or script-only output), newest first. */
@@ -159,63 +162,48 @@ export interface CronJobRun {
   /** Epoch seconds. */
   started_at: number;
   ended_at?: number | null;
-  is_active?: boolean;
-  archived?: boolean;
-  profile?: string | null;
-}
-
-export interface CronJobRunsResponse {
-  runs: CronJobRun[];
-  limit: number;
 }
 
 export const DIA_RUNS_DEFAULT_LIMIT = 50;
 
+/** `path` with the query parameters and, when the bundle has one, its profile. */
+export function scopedUrl(path: string, query: Record<string, string> = {}, profile = bundleProfile()): string {
+  const search = new URLSearchParams(query);
+  if (profile) search.set("profile", profile);
+  const qs = search.toString();
+  return qs ? `${path}?${qs}` : path;
+}
+
 export function getDiaModules(): Promise<DiaModulesResponse> {
-  return fetchJSON<DiaModulesResponse>(`${PLUGIN_BASE}/modules`);
+  return bktFetch<DiaModulesResponse>(scopedUrl(`${PLUGIN_BASE}/modules`));
 }
 
 export function getDiaHealth(): Promise<DiaHealthResponse> {
-  return fetchJSON<DiaHealthResponse>(`${PLUGIN_BASE}/health`);
+  return bktFetch<DiaHealthResponse>(scopedUrl(`${PLUGIN_BASE}/health`));
 }
 
-export function runDiaTool(
-  module: string,
-  tool: string,
-  args: DiaToolArguments,
-): Promise<DiaRunResponse> {
-  const body: DiaRunRequest = { module, tool, arguments: args };
-  return fetchJSON<DiaRunResponse>(`${PLUGIN_BASE}/run`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+export function runDiaTool(module: string, tool: string, args: DiaToolArguments): Promise<DiaRunResponse> {
+  return bktFetch<DiaRunResponse>(scopedUrl(`${PLUGIN_BASE}/run`), jsonInit("POST", { module, tool, arguments: args }));
 }
 
-export function getDiaRuns(limit: number = DIA_RUNS_DEFAULT_LIMIT): Promise<DiaRunsResponse> {
+export async function getDiaRuns(limit: number = DIA_RUNS_DEFAULT_LIMIT): Promise<DiaRunLogEntry[]> {
   const n = Number.isFinite(limit) ? Math.max(1, Math.floor(limit)) : DIA_RUNS_DEFAULT_LIMIT;
-  return fetchJSON<DiaRunsResponse>(`${PLUGIN_BASE}/runs?limit=${n}`);
+  const data = await bktFetch<{ runs?: DiaRunLogEntry[] }>(scopedUrl(`${PLUGIN_BASE}/runs`, { limit: String(n) }));
+  return data.runs ?? [];
+}
+
+/** Rows of the plugins hub; the console reads only the Show UI flag. */
+export async function getHubPlugins(): Promise<HubPluginRow[]> {
+  const data = await bktFetch<{ plugins?: HubPluginRow[] }>(scopedUrl("/api/dashboard/plugins/hub"));
+  return data.plugins ?? [];
+}
+
+/** The bundle profile's cron jobs. Cron routes are not auto-scoped, so the profile is always named. */
+export function getCronJobs(profile: string = bundleProfile()): Promise<CronJob[]> {
+  return bktFetch<CronJob[]>(`/api/cron/jobs?profile=${encodeURIComponent(profile)}`);
 }
 
 /** Run history of one cron job. An empty profile lets the backend find the job's owner. */
-export function getCronJobRuns(
-  id: string,
-  profile: string = getManagementProfile(),
-): Promise<CronJobRunsResponse> {
-  const url = `/api/cron/jobs/${encodeURIComponent(id)}/runs`;
-  return fetchJSON<CronJobRunsResponse>(
-    profile ? `${url}?profile=${encodeURIComponent(profile)}` : url,
-  );
-}
-
-/**
- * Whether the sidebar shows the `/dia` entry. Only once plugins have loaded, so the
- * entry never flashes in and out: hiding or disabling bkt-dia-common drops its
- * manifest from `GET /api/dashboard/plugins`.
- */
-export function isDiaConsoleNavVisible(
-  manifests: readonly Pick<PluginManifest, "name">[],
-  pluginsLoading: boolean,
-): boolean {
-  return !pluginsLoading && manifests.some((m) => m.name === DIA_COMMON_PLUGIN);
+export function getCronJobRuns(id: string, profile: string = bundleProfile()): Promise<{ runs: CronJobRun[] }> {
+  return bktFetch<{ runs: CronJobRun[] }>(scopedUrl(`/api/cron/jobs/${encodeURIComponent(id)}/runs`, {}, profile));
 }

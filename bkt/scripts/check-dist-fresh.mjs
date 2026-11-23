@@ -8,7 +8,7 @@ const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 execFileSync(process.execPath, [resolve(REPO, "bkt", "scripts", "build.mjs")], { cwd: REPO, stdio: "inherit" });
 const status = execFileSync(
-  "git", ["status", "--porcelain", "--untracked-files=all", "--", ":(glob)plugins/bkt-*/dashboard/dist/**"],
+  "git", ["status", "--porcelain", "--untracked-files=all", "--", ":(glob)plugins/bkt-*/dashboard/dist/**", ":(glob)plugins/bkt_dia_common/dashboard/dist/**"],
   { cwd: REPO, encoding: "utf8" },
 );
 if (status.trim()) {

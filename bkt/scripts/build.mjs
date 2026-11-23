@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Build every bkt-* dashboard plugin bundle into plugins/bkt-<name>/dashboard/dist/.
+// Build every bkt-* dashboard plugin bundle into plugins/bkt-<name>/dashboard/dist/
+// (bkt_dia_common for the dia package, see DIST_OVERRIDES).
 //
 //   node bkt/scripts/build.mjs            plugin bundles only (what check-dist-fresh compares)
 //   node bkt/scripts/build.mjs --vendor   also the git-ignored mermaid vendor bundle
@@ -27,7 +28,19 @@ export const PACKAGES = [
   "kanban-workflow",
   "health",
   "prompts",
+  "dia",
 ];
+
+// Packages whose bundle ships inside an existing Python plugin package (an importable,
+// underscored directory) instead of a plugins/bkt-<name>/ of their own.
+const DIST_OVERRIDES = { dia: "bkt_dia_common" };
+
+// Registered plugin name when it is not bkt-<name>; it must equal the manifest "name".
+const PLUGIN_NAMES = { dia: "bkt-dia-common" };
+
+function pluginName(name) {
+  return PLUGIN_NAMES[name] ?? `bkt-${name}`;
+}
 
 // Keeps a margin under the 500 KiB blob-size gate (scripts/ci/check_blob_size.py).
 const MAX_DIST_BYTES = 450 * 1024;
@@ -58,7 +71,7 @@ function resolveTs(base) {
 }
 
 function distDir(name) {
-  return join(REPO, "plugins", `bkt-${name}`, "dashboard", "dist");
+  return join(REPO, "plugins", DIST_OVERRIDES[name] ?? `bkt-${name}`, "dashboard", "dist");
 }
 
 function writeIfChanged(file, content) {
@@ -70,7 +83,7 @@ function writeIfChanged(file, content) {
 async function buildPackage(name) {
   const entry = join(BKT, "packages", name, "src", "index.tsx");
   if (!existsSync(entry)) {
-    console.log(`skip  bkt-${name} (no ${relative(REPO, entry)} yet)`);
+    console.log(`skip  ${pluginName(name)} (no ${relative(REPO, entry)} yet)`);
     return [];
   }
   const result = await build({
@@ -86,7 +99,7 @@ async function buildPackage(name) {
     legalComments: "none",
     charset: "utf8",
     define: { "process.env.NODE_ENV": '"production"' },
-    banner: { js: `/* bkt-${name}: generated from bkt/packages/${name} by bkt/scripts/build.mjs. Do not edit. */` },
+    banner: { js: `/* ${pluginName(name)}: generated from bkt/packages/${name} by bkt/scripts/build.mjs. Do not edit. */` },
     plugins: [aliasPlugin],
     logLevel: "warning",
   });

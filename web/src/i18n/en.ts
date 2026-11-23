@@ -1,4 +1,4 @@
-import type { BktModulesPageStrings, DiaConsolePageStrings, Translations } from "./types";
+import type { BktModulesPageStrings, Translations } from "./types";
 
 /** Exported on its own so the BKT Modules page can fall back to it for locales without the block. */
 export const enBktModulesPage: BktModulesPageStrings = {
@@ -56,113 +56,6 @@ export const enBktModulesPage: BktModulesPageStrings = {
     "monitoring-personalization": "Monitoring & personalization",
     uncategorized: "Uncategorized",
   },
-};
-
-/** Exported on its own so the DIA AI Console can fall back to it for locales without the block. */
-export const enDiaConsolePage: DiaConsolePageStrings = {
-  title: "DIA AI Console",
-  headline: "Run DIA modules, check the query service and review recent runs.",
-  tabs: {
-    status: "Status",
-    recentRuns: "Recent runs",
-    monitoring: "Monitoring",
-  },
-  status: {
-    endpointConfigured: "Endpoint configured",
-    endpointNotConfigured: "Endpoint not configured",
-    commonDisabled: "bkt-dia-common is disabled; DIA modules cannot run.",
-    enabled: "Enabled",
-    disabled: "Disabled",
-    lastRun: "Last run",
-    neverRun: "Never run",
-    runOk: "OK",
-    runFailed: "Failed",
-  },
-  health: {
-    title: "Query service health",
-    status: "Status",
-    documents: "Documents",
-    latency: "Latency",
-    ok: "Healthy",
-    error: "Unavailable",
-    checking: "Checking…",
-    hint: "Hint",
-  },
-  steps: {
-    validate: "Validate",
-    build_question: "Build question",
-    query: "Query",
-    result: "Result",
-  },
-  stepStatus: {
-    ok: "OK",
-    error: "Error",
-    skipped: "Skipped",
-    pending: "Running",
-  },
-  stages: {
-    validate: "The arguments are not valid for this tool.",
-    disabled: "This module is disabled. Enable it on the BKT Modules page.",
-    config: "The DIA endpoint is not configured or its settings are invalid.",
-    url_safety: "The DIA endpoint was refused by the URL safety policy.",
-    network: "The DIA query service could not be reached.",
-    http: "The DIA query service returned an error status.",
-    response: "The DIA query service returned an unexpected response.",
-  },
-  result: {
-    question: "Question",
-    answer: "Answer",
-    type: "Type",
-    sources: "Sources",
-    showMoreSources: (count) => `Show ${count} more`,
-    showFewerSources: "Show fewer",
-  },
-  form: {
-    required: "Required",
-    requiredMissing: (field) => `${field} is required`,
-    selectPlaceholder: "Select…",
-  },
-  recentRuns: {
-    time: "Time",
-    module: "Module",
-    tool: "Tool",
-    source: "Source",
-    outcome: "Outcome",
-    duration: "Duration",
-    sourceAgent: "Agent",
-    sourceConsole: "Console",
-  },
-  monitoring: {
-    name: "Name",
-    schedule: "Schedule",
-    state: "State",
-    lastRun: "Last run",
-    active: "Active",
-    paused: "Paused",
-    viewOutput: "View output",
-  },
-  empty: {
-    allHidden: "No DIA modules to show",
-    allHiddenHint: "All DIA modules are hidden or none are enabled. Change this on the BKT Modules page.",
-    noRuns: "No runs yet for this profile.",
-    noMonitors: "No monitoring jobs use a bkt-dia skill",
-    noMonitorsHint: "Create one with `hermes cron create` and the risk-monitor skill.",
-    noTools: "This module has no tools.",
-    noSources: "No sources returned.",
-  },
-  buttons: {
-    run: "Run",
-    running: "Running…",
-    refresh: "Refresh",
-    reload: "Reload",
-    openBktModules: "Open BKT Modules",
-  },
-  disabledModuleHint: "Enable this module on the BKT Modules page to run it.",
-  loadFailed: "Could not load the DIA modules.",
-  runFailed: (error) => `Run failed: ${error}`,
-  lastUpdated: (time) => `Last updated ${time}`,
-  elapsed: (seconds) => `${seconds}s elapsed`,
-  durationMs: (ms) => `${ms} ms`,
 };
 
 export const en: Translations = {
@@ -519,7 +412,6 @@ export const en: Translations = {
   },
 
   bktModulesPage: enBktModulesPage,
-  diaConsolePage: enDiaConsolePage,
 
   profiles: {
     newProfile: "New Profile",

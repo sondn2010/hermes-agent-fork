@@ -2,7 +2,7 @@
  * Schema → form mapping for DIA tool forms: which input each JSON-schema property gets,
  * the initial values, required-field checks and conversion to typed tool arguments.
  */
-import type { DiaSchemaProperty, DiaSchemaType, DiaToolArguments, DiaToolParameters } from "@/lib/dia-console-api";
+import type { DiaSchemaProperty, DiaSchemaType, DiaToolArguments, DiaToolParameters } from "./dia-api";
 
 export type DiaFieldKind = "text" | "textarea" | "number" | "boolean" | "enum";
 

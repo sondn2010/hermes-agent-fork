@@ -1,9 +1,8 @@
 /**
- * Pure helpers for the DIA AI Console: which modules are visible, how they group into
- * category tabs, the latest logged run per module, and which cron jobs are DIA monitors.
+ * Pure helpers for the DIA AI Console: which modules are visible, how they group by
+ * category, the latest logged run per module, and which cron jobs are DIA monitors.
  */
-import type { CronJob, HubAgentPluginRow } from "@/lib/api";
-import type { DiaCategory, DiaModule, DiaRunLogEntry } from "@/lib/dia-console-api";
+import type { CronJob, DiaCategory, DiaModule, DiaRunLogEntry, HubPluginRow } from "./dia-api";
 
 /** Category slug for modules whose manifest declares none. */
 export const DIA_UNCATEGORIZED = "uncategorized";
@@ -22,7 +21,7 @@ export interface DiaModuleGroup {
 }
 
 /** Plugin names the user hid with Show UI (`dashboard.hidden_plugins`). */
-export function hiddenPluginNames(rows: readonly Pick<HubAgentPluginRow, "name" | "user_hidden">[]): Set<string> {
+export function hiddenPluginNames(rows: readonly HubPluginRow[]): Set<string> {
   return new Set(rows.filter((row) => row.user_hidden).map((row) => row.name));
 }
 
@@ -36,7 +35,7 @@ function categorySlug(module: DiaModule): string {
 
 /**
  * Groups modules by category in the catalog's `categories` order; slugs the catalog does
- * not list follow, alphabetically. Empty categories are dropped.
+ * not list follow, alphabetically. Categories without a module (such as `shared`) are dropped.
  */
 export function groupDiaModules(modules: readonly DiaModule[], categories: readonly DiaCategory[]): DiaModuleGroup[] {
   const bySlug = new Map<string, DiaModule[]>();

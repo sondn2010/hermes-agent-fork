@@ -11,6 +11,7 @@ User and maintainer guide: [`docs/bkt/README.md`](../docs/bkt/README.md).
 | Path | What |
 |---|---|
 | `packages/<name>/src/index.tsx` | One plugin each; built to `plugins/bkt-<name>/dashboard/dist/index.js` |
+| `packages/dia/src/index.tsx` | The DIA AI Console (`/dia`, "Trung tâm DIA AI"); registers as `bkt-dia-common` and builds into that Python plugin's `plugins/bkt_dia_common/dashboard/dist/` (`DIST_OVERRIDES` in `scripts/build.mjs`) |
 | `shared/` | Helpers bundled into every plugin (SDK access, profile-aware requests, MarkdownView, ...) |
 | `theme/bkt.yaml` | Dashboard theme; plugins cannot ship themes, so the installer copies it |
 | `theme/skins/bkt.yaml` | CLI/TUI/Desktop skin; the installer copies it into `<home>/skins/` |

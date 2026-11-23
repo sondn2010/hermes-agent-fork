@@ -107,8 +107,8 @@ Core REST reused by the UI (not profile-scoped): `GET/DELETE /api/files`, `POST 
 
 ## bkt-dia console
 
-The `/dia` page (core `web/src/pages/DiaConsolePage.tsx`) and the BKT Modules Show UI switches.
-The console backend is `plugins/bkt_dia_common/dashboard/plugin_api.py`. It reuses rows already
+The `/dia` page is the `bkt-dia-common` dashboard plugin built from `bkt/packages/dia` (no core
+page, route or nav entry), plus the BKT Modules Show UI switches. The console backend is `plugins/bkt_dia_common/dashboard/plugin_api.py`. It reuses rows already
 listed above: `hermes_cli.web_server._require_token` (router dependency on every route),
 `plugins.plugin_storage.plugin_db` (`run_log.py`, `runs.db` per profile) and
 `_plugin_route_secret_scope` (binds `?profile=`, so config, secrets and the run log are the
@@ -130,5 +130,11 @@ Core REST used by the UI:
 |---|---|---|
 | `GET /api/dashboard/plugins/hub` (`user_hidden`, `orphan_dashboard_plugins`) | query | `hermes_cli/web_routers/dashboard_ui.py`, `hermes_cli/web_server_dashboard.py` `_merged_plugins_hub` |
 | `POST /api/dashboard/plugins/{name}/visibility` (`{hidden}`; writes `dashboard.hidden_plugins`) | query | `hermes_cli/web_routers/dashboard_ui.py` `post_plugin_visibility` |
-| `GET /api/dashboard/plugins` (omits hidden plugins; the `/dia` nav entry needs the `bkt-dia-common` manifest) | query | `hermes_cli/web_routers/dashboard_ui.py` `get_dashboard_plugins` |
+| `GET /api/dashboard/plugins` (omits hidden plugins, so hiding `bkt-dia-common` drops the `/dia` tab) | query | `hermes_cli/web_routers/dashboard_ui.py` `get_dashboard_plugins` |
 | `GET /api/cron/jobs`, `GET /api/cron/jobs/{job_id}/runs` | query | `hermes_cli/web_routers/cron.py` |
+
+Plugin SDK used by `bkt/packages/dia` (`window.__HERMES_PLUGIN_SDK__`, `web/src/plugins/registry.ts`):
+`fetchJSON` (an explicit `?profile=` is kept, otherwise `/api/plugins/*` and `/api/dashboard/plugins*`
+get the management profile), and the components `Badge`, `Button`, `Checkbox`, `Input`, `Label`,
+`Select`, `SelectOption`, `TabsList` and `TabsTrigger`. The console renders its own spinner, icons and
+route links because the SDK does not expose `Spinner`, `lucide-react` or the router `Link`.

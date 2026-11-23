@@ -24,7 +24,6 @@ import {
   Activity,
   BarChart3,
   BookOpen,
-  Bot,
   Boxes,
   Clock,
   Code,
@@ -95,7 +94,6 @@ const ProfileBuilderPage = lazy(() => import("@/pages/ProfileBuilderPage"));
 const SkillsPage = lazy(() => import("@/pages/SkillsPage"));
 const PluginsPage = lazy(() => import("@/pages/PluginsPage"));
 const BktModulesPage = lazy(() => import("@/pages/BktModulesPage"));
-const DiaConsolePage = lazy(() => import("@/pages/DiaConsolePage"));
 const McpPage = lazy(() => import("@/pages/McpPage"));
 const PairingPage = lazy(() => import("@/pages/PairingPage"));
 const ChannelsPage = lazy(() => import("@/pages/ChannelsPage"));
@@ -107,7 +105,6 @@ import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useI18n } from "@/i18n";
 import type { Translations } from "@/i18n/types";
 import { PluginPage, PluginSlot, usePlugins } from "@/plugins";
-import { isDiaConsoleNavVisible } from "@/lib/dia-console-api";
 import type { PluginManifest } from "@/plugins";
 import { useTheme } from "@/themes";
 import { isDashboardEmbeddedChatEnabled } from "@/lib/dashboard-flags";
@@ -172,7 +169,6 @@ const BUILTIN_ROUTES_CORE: Record<string, ComponentType> = {
   "/skills": SkillsPage,
   "/plugins": PluginsPage,
   "/bkt-modules": BktModulesPage,
-  "/dia": DiaConsolePage,
   "/mcp": McpPage,
   "/pairing": PairingPage,
   "/channels": ChannelsPage,
@@ -218,7 +214,6 @@ const BUILTIN_NAV_REST: NavItem[] = [
   { path: "/skills", labelKey: "skills", label: "Skills", icon: Package },
   { path: "/plugins", labelKey: "plugins", label: "Plugins", icon: Puzzle },
   { path: "/bkt-modules", label: "BKT Modules", icon: Boxes },
-  { path: "/dia", label: "DIA AI Console", icon: Bot },
   { path: "/mcp", label: "MCP", icon: Plug },
   { path: "/channels", label: "Channels", icon: Radio },
   { path: "/webhooks", label: "Webhooks", icon: Webhook },
@@ -473,13 +468,10 @@ export default function App() {
     const base = embeddedChat
       ? [CHAT_NAV_ITEM, ...BUILTIN_NAV_REST]
       : BUILTIN_NAV_REST;
-    const showDia = isDiaConsoleNavVisible(manifests, pluginsLoading);
-    return base.filter(
-      (n) =>
-        (showTokenAnalytics || n.path !== "/analytics") &&
-        (showDia || n.path !== "/dia"),
-    );
-  }, [embeddedChat, showTokenAnalytics, manifests, pluginsLoading]);
+    return showTokenAnalytics
+      ? base
+      : base.filter((n) => n.path !== "/analytics");
+  }, [embeddedChat, showTokenAnalytics]);
 
   const sidebarNav = useMemo(
     () => partitionSidebarNav(builtinNav, manifests),
