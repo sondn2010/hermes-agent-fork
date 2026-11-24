@@ -8,12 +8,12 @@ Thư mục này chứa các kịch bản tự động hóa (build & push) Docker
 
 ### Windows (CMD / PowerShell)
 ```cmd
-tools-devops\build_push.bat bkglobal-hermes-agent-v1.0.14 Dockerfile
+tools-devops\build_push.bat bkglobal-hermes-agent-v1.1.0 Dockerfile
 ```
 
 ### Linux / macOS (Bash)
 ```bash
-./tools-devops/build_push.sh bkglobal-hermes-agent-v1.0.14 Dockerfile
+./tools-devops/build_push.sh bkglobal-hermes-agent-v1.1.0 Dockerfile
 ```
 
 ## Tham số (Parameters)
